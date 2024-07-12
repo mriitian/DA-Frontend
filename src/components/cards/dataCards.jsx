@@ -31,6 +31,8 @@ const cardStyle = {
 };
 
 const DataCards = ({ data }) => {
+
+    // console.log(data);
     const [anchorEl,setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const dispatch = useDispatch();
@@ -49,14 +51,14 @@ const DataCards = ({ data }) => {
     }
 
     const handleCardClick = () =>{
-        navigate(`${currentURL}?datasource=${data.name}`)
+        navigate(`${currentURL}?datasource=${data.datasource_name}`)
     }
 
     const handleAcessClick = () => {
 
         dispatch(AccessModalSlice.actions.setOpen({
             open:true,
-            database_name:data.name
+            database_name:data.datasource_name
         }));
 
         setAnchorEl(null);
@@ -110,7 +112,7 @@ const DataCards = ({ data }) => {
                         }}
                         variant='body'
                     >
-                            {data.name}
+                            {data.datasource_name}
                     </Typography>
 
                     <IconButton

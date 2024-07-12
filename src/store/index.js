@@ -15,12 +15,14 @@ import AccessModalSlice from "./accessModalSlice";
 import newReportModalSlice from "./newReportModalSlice";
 import signupSlice from "./signupSlice";
 import loginSlice from "./loginSlice";
+import ReportDrawerSlice from "./reportDrawerSlice";
 
 const rootReducer = combineReducers({
     access_modal: AccessModalSlice.reducer,
     report_modal: newReportModalSlice.reducer,
     signup: signupSlice.reducer,
-    login: loginSlice.reducer
+    login: loginSlice.reducer,
+    report_drawer: ReportDrawerSlice.reducer
 });
 
 const persistedReducer = persistReducer(
@@ -28,7 +30,7 @@ const persistedReducer = persistReducer(
         key: "root",
         version: 1,
         storage: storage,
-        blacklist: ["access_modal","report_modal"],
+        blacklist: ["access_modal","report_modal", "report_drawer"],
     },
     rootReducer
 );

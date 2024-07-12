@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import loginSlice from "../store/loginSlice";
 
 const Login = () => {
-    const baseURL = `https://staging.hypadmin.marketgpt.ai/api/`;
+    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
+    console.log(baseURL);
     const dispatch = useDispatch();
 
     const token = useSelector(state => state.signup.token);

@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import signupSlice from "../store/signupSlice";
 
 const Signup = () => {
-    const baseURL = `https://staging.hypadmin.marketgpt.ai/api/`;
+    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
     const dispatch = useDispatch();
 
     const onSubmit = async (values,actions) => {

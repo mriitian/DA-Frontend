@@ -36,7 +36,7 @@ const useFetch = (url) => {
                     }
                 });
                 
-                    setData(data1);
+                    setData(data1.data);
                     setLoading(false);
                     setError(null);
                 

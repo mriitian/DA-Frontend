@@ -1,10 +1,10 @@
 import DataCards from "../../components/cards/dataCards";
-import { BrowseData } from "../../assets/dataAsset/dataCardData";
+// import { BrowseData } from "../../assets/dataAsset/dataCardData";
 import { Grid, Typography } from "@mui/material";
 import AccessControlModal from "../modals/accessControlModal";
 
-const DatabaseList= () => {
-    const cardData = BrowseData.data;
+const DatabaseList= ({cardData}) => {
+    // console.log(cardData);
     return ( 
         <>
             <Typography 
@@ -21,12 +21,12 @@ const DatabaseList= () => {
             <Grid container columnSpacing={0} rowSpacing={1}>
                 {cardData.map((item)=>(
                     <>
-                        {item.type === "Open Source" && (
-                            <Grid md={3} xs={6}>
-                                <DataCards data={item}/>
-                            </Grid>
-                        )}
+                        <Grid md={3} xs={6}>
+                            <DataCards data={item}/>
+                        </Grid>
                     </>
+
+                    // console.log(item)
                 ))}
             </Grid>
 

@@ -1,4 +1,4 @@
-import { Button, Grid, Typography, Box, Menu, MenuItem, Drawer, Divider, List, ListItemButton, TextField } from "@mui/material";
+import { Button, Grid, Typography, Box, Menu, MenuItem, Drawer, Divider, List, ListItemButton, TextField, AppBar } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import ReactFlow, { addEdge, ReactFlowProvider, useNodesState, useEdgesState, useKeyPress } from 'reactflow';
 import RectangleNode from "../../components/nodes/rect_node";
@@ -10,6 +10,7 @@ import { template2 } from "../../assets/dataAsset/data_template";
 import ChartNode from "../../components/nodes/chartNode";
 import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
 import AddComponentButtons from "../../components/buttons/add_component_buttons";
+import ReportDrawer from "../../components/drawers/text_drawer";
 
 const nodeTypes = {
     rectangle: RectangleNode,
@@ -31,6 +32,7 @@ const EditPage = () => {
         textTransform: 'none',
     };
 
+   
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const onConnect = (params) => setEdges((eds) => addEdge(params, eds));
@@ -39,6 +41,12 @@ const EditPage = () => {
 
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState(null);
+
+    const [style, setStyle] = useState(null);
+
+    useEffect(()=>{
+        console.log(style);
+    },[style])
 
     const handleSaveClick = () =>{
         console.log(nodes);
@@ -54,32 +62,17 @@ const EditPage = () => {
                     x: 250,
                     y: 250 
                 },
-                data: { label: `${type} ${nodes.length + 1}`},
+                data: { label: `${type} ${nodes.length + 1}`, setNodes:setNodes, styles:style, type:type },
             };
     
             setNodes((nds) => nds.concat(newNode));
+            setDrawerOpen(true);
         }
-
-        
-
         else{
             setDrawerOpen(true);
         }
 
     }
-
-    // const [cursorStyle, setCursorStyle] = useState('default');
-
-    // const handleComponentClick = (type) => {
-    //     console.log(type);
-    //     setSelectedComponent(type);
-    //     setCursorStyle('crosshair');
-        
-    //     if (type === "chart") {
-    //         setDrawerOpen(true);
-    //     }
-    // }
-
     const handleChartNodeClick = (chart) => {
         const newChart = {
             id: `chart_${nodes.length + 1}`,
@@ -88,42 +81,12 @@ const EditPage = () => {
                 x: 250,
                 y: 250 
             },
-            data: { label: `Chart ${nodes.length + 1}`, chartData: chart },
+            data: { label: `Chart ${nodes.length + 1}`, chartData: chart},
         };
 
         setNodes((nds) => nds.concat(newChart));
         handleClose();
     }
-
-
-    // useEffect(() => {
-    //     document.body.style.cursor = cursorStyle;
-    //     return () => {
-    //         document.body.style.cursor = 'default';
-    //     };
-    // }, [cursorStyle]);
-
-    // const handleCanvasClick = (event) => {
-    //     if (selectedComponent) {
-    //         const bounds = flowWrapper.current.getBoundingClientRect();
-    //         const position = {
-    //             x: 250,
-    //             y: 250
-    //         };
-    
-    //         const newNode = {
-    //             id: `${selectedComponent}_${nodes.length + 1}`,
-    //             type: selectedComponent,
-    //             position: position,
-    //             data: { label: `${selectedComponent} ${nodes.length + 1}` },
-    //         };
-    
-    //         setNodes((nds) => nds.concat(newNode));
-    //         setSelectedComponent(null); 
-    //         setCursorStyle('default');  
-    //     }
-    // }
-    
     
     const handleDeleteNode = () => {
         setNodes((nds) => nds.filter(node => !node.selected));
@@ -146,29 +109,42 @@ const EditPage = () => {
         };
     }, [nodes]);
 
+    useEffect(() => {
+        // Update styles of existing nodes
+        setNodes((nds) =>
+            nds.map((node) =>
+                node.type === 'text' ? { ...node, data: { ...node.data, styles: style } } : node
+            )
+        );
+    }, [style]);
+
     const addComponent= [
-        {
-            "text":"Add Charts",
-            "icon":"chart",
-            "type":"chart"
-        },
-        {
-            "text":"Line",
-            "icon":"line",
-            "type":"line"
-        },
-        {
-            "text":"Rectangle",
-            "icon":"rect",
-            "type":"rectangle"
-        },
-        {
-            "text":"Text Box",
-            "icon":"text",
-            "type":"text"
-        },
+        {"text":"Add Charts","icon":"chart","type":"chart"},
+        {"text":"Line","icon":"line","type":"line"},
+        {"text":"Rectangle","icon":"rect","type":"rectangle"},
+        {"text":"Text Box","icon":"text","type":"text"},
     ]
 
+    const mainContentStyles = {
+        width: drawerOpen ? "80%" : "100%",
+        backgroundColor: "white",
+        border: "1px solid #D3D3D3",
+        boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+        height: `calc(100% - 64px)`, // Adjust this value based on the height of the second bar
+        position: "relative",
+        overflow: "auto",
+        borderRadius: "15px",
+        marginTop: "2%"  // Add this line to create space below the top bar
+    };
+
+    useEffect(() => {
+        const selectedNode = nodes.find(node => node.selected);
+        if (selectedNode) {
+            setDrawerOpen(true);
+        }
+    }, [nodes]);
+
+    
     return (
         <ReactFlowProvider>
             <Box>
@@ -255,9 +231,30 @@ const EditPage = () => {
                                 Add Template
                             </Typography>
                         </Button>
+
+                        {drawerOpen && (<Button
+                            sx={buttonStyles}
+                            variant="contained"
+                            color="primary"
+                            startIcon={
+                                <AddIcon
+                                    sx={{
+                                        border: "1px solid white",
+                                        borderRadius: "5px",
+                                        height: "20px",
+                                        width: "90%"
+                                    }}
+                                />
+                            }
+
+                            onClick={()=>setDrawerOpen(false)}
+                        >
+                            <Typography variant="body2">
+                                Exit
+                            </Typography>
+                        </Button>)}
                     </Grid>
                 </Grid>
-
                 <Box
                     sx={{
                         margin: "2% 0% 0 0%",
@@ -271,16 +268,16 @@ const EditPage = () => {
                     <Box
                         ref={flowWrapper}
                         sx={{
-                            width: "100%",
+                            ...mainContentStyles,
+                            width: drawerOpen ? "80%" : "100%",
                             backgroundColor: "white",
                             border: "1px solid #D3D3D3",
                             boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-                            height:"100%",
+                            height: "100%",
                             position: "relative",
                             overflow: "auto",
-                            borderRadius:"15px"
+                            borderRadius: "15px"
                         }}
-                        // onClick={handleCanvasClick}
                     >
                         <ReactFlow
                             nodes={nodes}
@@ -301,7 +298,7 @@ const EditPage = () => {
                     </Box>
                 </Box>
 
-                <Drawer
+                {/* <Drawer
                     open={drawerOpen}
                     onClose={() => setDrawerOpen(false)}
                     anchor="right"
@@ -324,8 +321,10 @@ const EditPage = () => {
                             <ListItemButton onClick={()=>handleChartNodeClick(chart)}>{chart.title}</ListItemButton>
                         ))}
                     </List>
-                    
-                </Drawer>
+                </Drawer> */}
+
+                <ReportDrawer open={drawerOpen} setOpen={setDrawerOpen} type={"text"} style={style} setStyle={setStyle} />
+
             </Box>
         </ReactFlowProvider>
     );

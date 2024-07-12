@@ -6,8 +6,7 @@ import { useState } from "react";
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-const DatabaseList = () => {
-    const cardData = BrowseData.data;
+const DatabaseList = ({cardData}) => {
 
     const [brand, setBrand] = useState('');
     const [dataChannel, setDataChannel] = useState('');
@@ -19,6 +18,8 @@ const DatabaseList = () => {
     const handleDataChannelChange = (event) => {
         setDataChannel(event.target.value);
     };
+
+    const channel_types = [...new Set(cardData.map(item => item.channel_type))];
 
     return ( 
         <>
@@ -119,53 +120,29 @@ const DatabaseList = () => {
                Organizational Data
             </Typography>
 
-            <Box>
-                <Typography 
-                    sx={{
-                        color: "grey",
-                        fontFamily: "sans-serif",
-                        margin: "15px 2%",
-                    }}
-                >
-                    Display Performance
-                </Typography>
-                <Grid container columnSpacing={0} rowSpacing={1}>
-                    {cardData.map((item)=>(
-                        <>
-                            {item.type === "Organizational" && item.category==="Display Performance"&& (
-                                <Grid md={3} xs={6}>
+            {channel_types.map((channel) =>(
+                <Box>
+                    <Typography 
+                        sx={{
+                            color: "grey",
+                            fontFamily: "sans-serif",
+                            margin: "15px 2%",
+                        }}
+                    >
+                        {channel.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                    </Typography>
+                    <Grid container columnSpacing={0} rowSpacing={1}>
+                        {cardData.map((item)=>(
+                            
+                            item.channel_type == channel && (
+                                <Grid md={3} xs={6} key={item.id}>
                                     <DataCards data={item}/>
                                 </Grid>
-                            )}
-                        </>
-                    ))}
-                </Grid>
-            </Box>
-            
-            <Box>
-                <Typography
-                    sx={{
-                        color: "grey",
-                        fontFamily: "sans-serif",
-                        margin: "15px 2%",
-                    }}
-                >
-                    Search Performance
-                </Typography>
-                <Grid container rowSpacing={2}>
-                    {cardData.map((item)=>(
-                        <>
-                            {item.type === "Organizational" && item.category==="Search Performace"&& (
-                                <Grid xs={6} md={3}>
-                                    <DataCards data={item}/>
-                                </Grid>
-                            )}
-                        </>
-                    ))}
-                </Grid>
-            </Box>
-            
-
+                            )
+                        ))}
+                    </Grid>
+                </Box>
+            ))}
             <AccessControlModal/>
         </>
     );
