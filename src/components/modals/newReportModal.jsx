@@ -6,12 +6,15 @@ import * as Yup from 'yup';
 import newReportModalSlice from '../../store/newReportModalSlice';
 import StepOne from '../forms/step1';
 import StepTwo from '../forms/step2';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const NewReportModal = () => {
     const steps = ['Choose Data', 'Choose Template'];
     const [activeStep, setActiveStep] = useState(0);
     const open = useSelector(state => state.report_modal.open);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const currentURL = useLocation().pathname;
 
     const handleClose = () => {
         dispatch(newReportModalSlice.actions.setOpen({ open: false }));
@@ -32,6 +35,10 @@ const NewReportModal = () => {
         setActiveStep(0);
         handleClose();
     };
+
+    const handleBlankClick = () => {
+        navigate(`/report/edit`);
+    }
 
     const validationSchema = [
         Yup.object({
@@ -103,10 +110,14 @@ const NewReportModal = () => {
                                         Submit
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleNext}>
-                                        Next
+                                    <Button sx= {{border:"1px solid green"}} onClick={handleNext}>
+                                        Choose Template
                                     </Button>
                                 )}
+
+                                <Button onClick={handleBlankClick} sx={{border:"1px solid black", color:"black", marginLeft:"1%"}}>
+                                    Start from Blank
+                                </Button>
                             </Box>
                         </Form>
                     )}

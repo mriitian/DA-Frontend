@@ -30,7 +30,7 @@ const cardStyle = {
 
 };
 
-const DataCards = ({ data }) => {
+const DataCards = ({ data, disable=false }) => {
 
     // console.log(data);
     const [anchorEl,setAnchorEl] = useState(null);
@@ -51,7 +51,8 @@ const DataCards = ({ data }) => {
     }
 
     const handleCardClick = () =>{
-        navigate(`${currentURL}?datasource=${data.datasource_name}`)
+        if(!disable)
+            navigate(`${currentURL}?datasource=${data.datasource_name}`)
     }
 
     const handleAcessClick = () => {
@@ -114,20 +115,23 @@ const DataCards = ({ data }) => {
                     >
                             {data.datasource_name}
                     </Typography>
-
-                    <IconButton
-                        sx={{
-                            position: 'absolute',
-                            bottom: 8,
-                            right: 8,
-                            border:'1px solid grey',
-                            width:"25px",
-                            height:"25px"
-                        }}
-                        onClick={handleClick}
-                    >
-                        <MoreHorizOutlinedIcon fontSize='small' />
-                    </IconButton>
+                    
+                    {!disable && (
+                        <IconButton
+                            sx={{
+                                position: 'absolute',
+                                bottom: 8,
+                                right: 8,
+                                border:'1px solid grey',
+                                width:"25px",
+                                height:"25px"
+                            }}
+                            onClick={handleClick}
+                        >
+                            <MoreHorizOutlinedIcon fontSize='small' />
+                        </IconButton>
+                    )}
+                   
                     <Menu
                         anchorEl={anchorEl}
                         open={open}
