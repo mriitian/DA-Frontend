@@ -2,13 +2,21 @@ import DataCards from "../../components/cards/dataCards";
 import { BrowseData } from "../../assets/dataAsset/dataCardData";
 import { Box, Grid, Typography,Select,InputLabel,FormControl,Menu,MenuItem,Button,IconButton } from "@mui/material";
 import AccessControlModal from "../modals/accessControlModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import DataFolderCards from "../cards/datafolderCards";
+import useFetch from "../hooks/useFetch";
 
 const DatabaseList = ({cardData}) => {
 
-    const [brand, setBrand] = useState('');
+    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
+    const {data:brandData,loading,error} = useFetch(baseURL + `data/brand`);
+
+    const datasources = cardData.datasource_data;
+    const datafolders = cardData.data2;
+
+    const [brand,setBrand] = useState('');
     const [dataChannel, setDataChannel] = useState('');
 
     const handleBrandChange = (event) => {
@@ -19,12 +27,32 @@ const DatabaseList = ({cardData}) => {
         setDataChannel(event.target.value);
     };
 
-    const channel_types = [...new Set(cardData.map(item => item.channel_type))];
+    const channel_types = [...new Set(datasources.map(item => item.channel_type))];
+
+    const [filt_datasources, setFilt_datasources]= useState(datasources);
+    const [filt_datafolders, setFilt_datafolders]= useState(datafolders);
+
+
+    useEffect(()=>{
+
+        if(brand.length == 0){  
+            setFilt_datafolders(datafolders);
+            setFilt_datasources(datasources);
+        }
+
+        else{
+            const arr1 = datafolders.filter((item)=>item.brand_name == brand);
+            setFilt_datafolders(arr1);
+
+            const arr2 = datasources.filter((item)=>item.brand_name == brand);
+            setFilt_datasources(arr2);
+        }
+    },[brand])
 
     return ( 
         <>
             <Grid container sx={{margin:"20px 0 10px 0"}}>
-                <Grid xs={9}>
+                <Grid item xs={9}>
                     <FormControl 
                         variant="outlined" 
                         sx={{ 
@@ -43,9 +71,10 @@ const DatabaseList = ({cardData}) => {
                             <MenuItem value="">
                                 <em>None</em>
                             </MenuItem>
-                            <MenuItem value="Brand 1">Brand 1</MenuItem>
-                            <MenuItem value="Brand 2">Brand 2</MenuItem>
-                            <MenuItem value="Brand 3">Brand 3</MenuItem>
+                            {brandData && brandData.map((item) => (
+                                <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                            ))}
+
                         </Select>
                     </FormControl>
                 
@@ -121,7 +150,7 @@ const DatabaseList = ({cardData}) => {
             </Typography>
 
             {channel_types.map((channel) =>(
-                <Box>
+                <Box key={channel}>
                     <Typography 
                         sx={{
                             color: "grey",
@@ -132,10 +161,18 @@ const DatabaseList = ({cardData}) => {
                         {channel.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                     </Typography>
                     <Grid container columnSpacing={0} rowSpacing={1}>
-                        {cardData.map((item)=>(
+                        {filt_datafolders.map((item)=>(
                             
                             item.channel_type == channel && (
-                                <Grid md={3} xs={6} key={item.id}>
+                                <Grid item md={3} xs={6} key={item.id}>
+                                    <DataFolderCards data={item}/>
+                                </Grid>
+                            )
+                        ))}
+                        {filt_datasources.map((item)=>(
+                            
+                            item.channel_type == channel && (
+                                <Grid item md={3} xs={6} key={item.id}>
                                     <DataCards data={item}/>
                                 </Grid>
                             )

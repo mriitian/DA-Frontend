@@ -16,13 +16,15 @@ import newReportModalSlice from "./newReportModalSlice";
 import signupSlice from "./signupSlice";
 import loginSlice from "./loginSlice";
 import ReportDrawerSlice from "./reportDrawerSlice";
+import ReportStoreSlice from "./reportStoreSlice";
 
 const rootReducer = combineReducers({
     access_modal: AccessModalSlice.reducer,
     report_modal: newReportModalSlice.reducer,
     signup: signupSlice.reducer,
     login: loginSlice.reducer,
-    report_drawer: ReportDrawerSlice.reducer
+    report_drawer: ReportDrawerSlice.reducer,
+    report_store: ReportStoreSlice.reducer
 });
 
 const persistedReducer = persistReducer(

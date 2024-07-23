@@ -10,18 +10,41 @@ import FormatUnderlinedOutlinedIcon from '@mui/icons-material/FormatUnderlinedOu
 import FormatAlignJustifyOutlinedIcon from '@mui/icons-material/FormatAlignJustifyOutlined';
 import ColorPicker from "./color_picker";
 
-const TextDrawer = ({open,setOpen, style,setStyle}) => {
+const TextDrawer = ({open,nodeId, setOpen, style,setStyle}) => {
     const [alignment, setAlignment] = useState('left');
     const [formats, setFormats] = useState(() => []);
     const [fontSize, setFontSize] = useState('14px');
     const [selectedColor, setSelectedColor] = useState('#000000');
 
     useEffect(()=>{
-        
-        const obj={textAlign:alignment,formats, fontSize:fontSize, color:selectedColor};
-        setStyle(obj);
 
-    },[alignment,formats,fontSize,selectedColor])
+        if(style.hasOwnProperty(nodeId)){
+            const node_style = style[nodeId];  
+
+            setAlignment(node_style.textAlign);
+            setFormats(node_style.formats);
+            setFontSize(node_style.fontSize);
+            setSelectedColor(node_style.color);
+        }
+
+        else{
+            setAlignment('left');
+            setFormats(() => []);
+            setFontSize('14px');
+            setSelectedColor('#000000');
+        }
+        
+    },[nodeId])
+
+    useEffect(() => {
+        const obj = { textAlign: alignment, formats, fontSize: fontSize, color: selectedColor };
+    
+        setStyle(prevStyle => ({
+            ...prevStyle,
+            [nodeId]: obj
+        }));
+    }, [alignment, formats, fontSize, selectedColor, nodeId]);
+
 
     const handleAlignment = (event, newAlignment) => {
         setAlignment(newAlignment);
@@ -56,6 +79,7 @@ const TextDrawer = ({open,setOpen, style,setStyle}) => {
                     }
                 }}
                 variant="persistent"
+                // onClose={setOpen(false)}
             >
 
                 <Divider />

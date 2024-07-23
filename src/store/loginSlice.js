@@ -18,6 +18,12 @@ const loginSlice = createSlice({
             state.refreshToken = action.payload.refreshToken;
             state.token = action.payload.token;
         },
+
+        logout: (state) => {
+            state.user = null;
+            state.refreshToken = null;
+            state.token = null;
+        },
     },
 });
 

@@ -12,9 +12,10 @@ const RectangleNode = ({ data,selected }) => {
         background: 'transparent',
         border: 'none',
     };
+
     return (
         <>
-            <NodeResizer color="#ff0071" isVisible={selected}/>
+            <NodeResizer  color="#ff0071" isVisible={selected}/>
             <Box sx={{
                 border:"1px solid #222",
                 borderRadius:"2px",

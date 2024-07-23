@@ -7,32 +7,26 @@ import WorkspacePage from "./pages/workspace/workspace_page";
 import Signup from "./pages/signup";
 import Login from "./pages/login";
 import EditPage from "./pages/report/edit";
+import ProtectedRoute from "./protected_route";
+import ViewPage from "./pages/report/view";
 
 export const AppRoutes = () => {
     const routes = [
-        // { 
-        //     path: "/", 
-        //     element: <Navigate to="/dashboard" replace /> 
-        // },
-        // { 
-        //     path: "/dashboard", 
-        //     element: <ProtectedRoute><Dashboard collapsed={collapsed} setCollapsed={setCollapsed} /></ProtectedRoute> 
-        // },
         {
             path:"/home",
             element:<HomePage/>
         },
         {
             path:"/browse-data/open-source",
-            element:<OpenSourcePage/>
+            element: <ProtectedRoute element={<OpenSourcePage/>}/>
         },
         {
             path:"/browse-data/organizational",
-            element:<OrgPage/>
+            element: <ProtectedRoute element={<OrgPage/>}/>
         },
         {
             path:"/workspace",
-            element: <WorkspacePage/>
+            element: <ProtectedRoute element={<WorkspacePage/>}/>
         },
         {
             path:"/signup",
@@ -44,7 +38,11 @@ export const AppRoutes = () => {
         },
         {
             path:"/report/edit",
-            element: <EditPage/>
+            element: <ProtectedRoute element={<EditPage/>}/>
+        },
+        {
+            path:"/report/:report_name/view",
+            element: <ProtectedRoute element={<ViewPage/>}/>
         },
       
     ];

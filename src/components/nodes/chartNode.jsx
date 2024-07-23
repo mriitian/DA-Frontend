@@ -4,10 +4,11 @@ import { Box } from "@mui/material";
 
 const ChartNode = ({ data, selected }) => {
     const chart = data.chartData;
-    console.log(chart);
+    // console.log(chart);
 
     return (
         <>
+
             <NodeResizer isVisible={selected} color="#ff0071" minWidth={100} minHeight={30} />
             {/* <Box sx={{
                 border: "1px solid #222",
@@ -22,7 +23,7 @@ const ChartNode = ({ data, selected }) => {
                 justifyContent: "center",
                 alignItems: "center",
             }}> */}
-                <div style={{width:"100%", height:"100%", maxWidth:"300px", maxHeight:"300px"}}>
+                <div style={{width:"100%", height:"100%"}}>
                     <ChartDisplay chart={chart} />
                 </div>
                 

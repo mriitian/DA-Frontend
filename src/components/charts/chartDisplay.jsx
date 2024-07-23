@@ -60,7 +60,7 @@ const ChartDisplay = ({chart}) => {
             {pagination && paginated_xValues.length>0 && paginatedChart.x_values.length > 0 && (
                 
                 <div style={{width:"100%", height:"100%"}}>
-                    {console.log(paginatedChart)}
+                    {/* {console.log(paginatedChart)} */}
                     {/* {console.log(paginated_xValues,paginated_yValues)} */}
                     <ChartComponent chartdata ={paginatedChart}/>
                     <Pagination 
@@ -75,7 +75,7 @@ const ChartDisplay = ({chart}) => {
             )}
             {!pagination && (
                 <div style={{width:"100%", height:"100%"}}>
-                    {console.log(x_values,y_values)}
+                    {/* {console.log(x_values,y_values)} */}
                     <ChartComponent chartdata={chart}/>
                 </div>
                 

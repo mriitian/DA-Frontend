@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import loginSlice from "../../store/loginSlice";
 import { useDispatch} from "react-redux";
 import { useNavigate } from "react-router-dom";
+// import loginSlice from "../../store/loginSlice";
 
 const useFetch = (url) => {
     const [data, setData] = useState("");
@@ -18,12 +19,12 @@ const useFetch = (url) => {
 
     // console.log(token);
 
-    // const handleLogout = () => {
+    const handleLogout = () => {
         
-    //     dispatch(authSlice.actions.logout());
-    //     console.log("Logged out");
-    //     navigate(-1);
-    // }
+        dispatch(loginSlice.actions.logout());
+        console.log("Logged out");
+        navigate('/login');
+    }
     
 
     useEffect(()=>{
