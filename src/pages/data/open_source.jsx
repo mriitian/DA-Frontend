@@ -1,0 +1,32 @@
+import DatabaseList from "../../components/open_source/database_list";
+import { useSearchParams } from "react-router-dom";
+import TableList from "../../components/open_source/table_list";
+import useFetch from "../../components/hooks/useFetch";
+import { useEffect, useState } from "react";
+
+const OpenSourcePage = () => {
+
+    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
+
+    const [searchParams] = useSearchParams();
+    const datasource_name = searchParams.get('datasource');
+    const {data:data1,loading,error} = useFetch(baseURL+'data/datasources?security_type=open-source');
+
+    const [datasource_data,setDatasource_data] = useState([]);
+
+    useEffect(()=>{
+        if(data1){
+            const arr = data1.filter((temp)=> temp.data_folder === null);
+            setDatasource_data(arr);
+        }
+    },[data1])
+    
+    return ( 
+        <>
+            {!datasource_name && !loading && datasource_data && <DatabaseList cardData={datasource_data}/>}
+            {datasource_name && <TableList datasource_name={datasource_name}/>}
+        </>
+    );
+}
+ 
+export default OpenSourcePage;
