@@ -11,12 +11,13 @@ import {
   REHYDRATE,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import AccessModalSlice from "./accessModalSlice";
-import newReportModalSlice from "./newReportModalSlice";
-import signupSlice from "./signupSlice";
-import loginSlice from "./loginSlice";
-import ReportDrawerSlice from "./reportDrawerSlice";
-import ReportStoreSlice from "./reportStoreSlice";
+import AccessModalSlice from "./slices/accessModalSlice";
+import newReportModalSlice from "./slices/newReportModalSlice";
+import signupSlice from "./slices/signupSlice";
+import loginSlice from "./slices/loginSlice";
+import ReportDrawerSlice from "./slices/reportDrawerSlice";
+import ReportStoreSlice from "./slices/reportStoreSlice";
+import ReportDatasourceSlice from "./slices/report_datasources";
 
 const rootReducer = combineReducers({
     access_modal: AccessModalSlice.reducer,
@@ -24,7 +25,8 @@ const rootReducer = combineReducers({
     signup: signupSlice.reducer,
     login: loginSlice.reducer,
     report_drawer: ReportDrawerSlice.reducer,
-    report_store: ReportStoreSlice.reducer
+    report_store: ReportStoreSlice.reducer,
+    report_datasource: ReportDatasourceSlice.reducer
 });
 
 const persistedReducer = persistReducer(

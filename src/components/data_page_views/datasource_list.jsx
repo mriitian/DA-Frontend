@@ -2,13 +2,13 @@ import { useLocation, useParams } from "react-router-dom";
 import { Breadcrumbs,Link,Typography,Box,Grid } from "@mui/material";
 import { BrowseData } from "../../assets/dataAsset/dataCardData";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import DataCards from "../../components/cards/dataCards";
+import DataCards from "../cards/dataCards";
 import AccessControlModal from "../modals/accessControlModal";
+import useFetch from "../hooks/useFetch";
 
-const TableList = ({datasource_name}) => {
-    const data = BrowseData.data.find(val => val.datasource_name == datasource_name);
-    // console.log(data);
+const DatasourceList = ({type, datafolder_name,datafolder_data}) => {
 
+    const data = datafolder_data;
     const currentURL = useLocation().pathname;
     // const prevPath = currentURL.replace(/\/\d+$/, '/');
 
@@ -16,9 +16,8 @@ const TableList = ({datasource_name}) => {
 
     return ( 
         <>
-            
             <AccessControlModal />
-            {/* <Breadcrumbs 
+            <Breadcrumbs 
                 aria-label="breadcrumb"
                 separator={<NavigateNextIcon fontSize="small" />}
                 sx={{
@@ -26,11 +25,11 @@ const TableList = ({datasource_name}) => {
                 }}
             >
                 <Link sx={{fontWeight:500}} underline="hover" color="inherit" href={currentURL}>
-                    Organizational Data
+                    {type}
                 </Link>
                
-                <Typography sx={{fontWeight:600}} color="grey">{data.datasource_name}</Typography>
-            </Breadcrumbs> */}
+                <Typography sx={{fontWeight:600}} color="grey">{datafolder_name}</Typography>
+            </Breadcrumbs>
 
             <Box
                 sx={{
@@ -38,14 +37,12 @@ const TableList = ({datasource_name}) => {
                 }}
             >
                 <Grid container columnSpacing={1} rowSpacing={2}>
-                    {data.tables.map((item)=>(
-                        <>
-                            {(
-                                <Grid xs={3}>
-                                    <DataCards data={item}/>
-                                </Grid>
-                            )}
-                        </>
+                    {data.map((item)=>(
+                            
+                        <Grid item xs={3} key={item.id}>
+                            <DataCards data={item}/>
+                        </Grid>
+                            
                     ))}
                 </Grid>
             </Box>
@@ -53,4 +50,4 @@ const TableList = ({datasource_name}) => {
     );
 }
  
-export default TableList;
+export default DatasourceList;

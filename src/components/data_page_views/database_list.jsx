@@ -1,4 +1,4 @@
-import DataCards from "../../components/cards/dataCards";
+import DataCards from "../cards/dataCards";
 import { BrowseData } from "../../assets/dataAsset/dataCardData";
 import { Box, Grid, Typography,Select,InputLabel,FormControl,Menu,MenuItem,Button,IconButton } from "@mui/material";
 import AccessControlModal from "../modals/accessControlModal";
@@ -7,11 +7,36 @@ import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DataFolderCards from "../cards/datafolderCards";
 import useFetch from "../hooks/useFetch";
+import DataPage_API from "../../utilities/api/dataPageApis";
+import { useSelector } from "react-redux";
 
-const DatabaseList = ({cardData}) => {
+const DatabaseList = ({type, cardData}) => {
 
-    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
-    const {data:brandData,loading,error} = useFetch(baseURL + `data/brand`);
+    const [brandData,setBrandData] = useState([]);
+    const [loading,setLoading] = useState(true);
+    const [error,setError] = useState(null);
+
+    const accessToken = useSelector(state => state.login.token);
+
+    useEffect(()=>{
+        const fetchBrands = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const data = await DataPage_API.getBrands(accessToken);
+                console.log(data);
+                setBrandData(data);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBrands();
+    },[accessToken])
+
 
     const datasources = cardData.datasource_data;
     const datafolders = cardData.data2;
@@ -32,22 +57,44 @@ const DatabaseList = ({cardData}) => {
     const [filt_datasources, setFilt_datasources]= useState(datasources);
     const [filt_datafolders, setFilt_datafolders]= useState(datafolders);
 
-
     useEffect(()=>{
 
-        if(brand.length == 0){  
+        if(dataChannel.length == 0 && brand.length == 0){
             setFilt_datafolders(datafolders);
             setFilt_datasources(datasources);
         }
 
-        else{
+        else if(brand.length == 0){
+            const arr1 = datafolders.filter((item)=>item.channel_type == dataChannel);
+            setFilt_datafolders(arr1);
+
+            const arr2 = datasources.filter((item)=>item.channel_type == dataChannel);
+            setFilt_datasources(arr2);
+        }
+
+        else if(dataChannel.length == 0){
             const arr1 = datafolders.filter((item)=>item.brand_name == brand);
             setFilt_datafolders(arr1);
 
             const arr2 = datasources.filter((item)=>item.brand_name == brand);
             setFilt_datasources(arr2);
         }
-    },[brand])
+
+        else{
+            let arr1 = datafolders.filter((item)=>item.channel_type == dataChannel);
+            let arr2 = datafolders.filter((item)=>item.brand_name == brand);
+
+            setFilt_datafolders(arr1.filter(element => arr2.includes(element)));
+
+            arr1 = datasources.filter((item)=>item.channel_type == dataChannel);
+            arr2 = datasources.filter((item)=>item.brand_name == brand);
+
+            setFilt_datasources(arr1.filter(element => arr2.includes(element)));
+        }
+        
+    },[brand,dataChannel])
+
+
 
     return ( 
         <>
@@ -94,9 +141,10 @@ const DatabaseList = ({cardData}) => {
                             <MenuItem value="">
                                 <em>None</em>
                             </MenuItem>
-                            <MenuItem value="Channel 1">Channel 1</MenuItem>
-                            <MenuItem value="Channel 2">Channel 2</MenuItem>
-                            <MenuItem value="Channel 3">Channel 3</MenuItem>
+                            {channel_types && channel_types.map((item) => (
+                                 <MenuItem key={item} value={item}>{item}</MenuItem>
+                            ))}
+
                         </Select>
                     </FormControl>
                 </Grid>
@@ -146,7 +194,7 @@ const DatabaseList = ({cardData}) => {
                     margin: "15px 2%",
                 }}
             >
-               Organizational Data
+               {type}
             </Typography>
 
             {channel_types.map((channel) =>(

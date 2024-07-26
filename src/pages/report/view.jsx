@@ -8,7 +8,8 @@ import 'reactflow/dist/style.css';
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import useFetch from "../../components/hooks/useFetch";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import ReportView_API from "../../utilities/api/reportViewApis";
 
 const nodeTypes = {
     rectangle: RectangleNode,
@@ -36,7 +37,6 @@ const ViewPage = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
     const flowWrapper = useRef(null);
-    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
 
     const { report_name } = useParams();
 
@@ -44,8 +44,29 @@ const ViewPage = () => {
         setNodes([]);
     }, []);
 
-    const { data, loading, error } = useFetch(baseURL + `reports/reports/${report_name}`);
-    console.log(data);
+    const [data,setData] = useState(null);
+    const [loading,setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(()=>{
+        const fetchChartData = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const data1 = await ReportView_API.getReport(token,report_name);
+                setData(data1);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchChartData();
+
+    },[token])
+
 
     useEffect(() => {
         if (data) {

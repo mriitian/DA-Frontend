@@ -4,11 +4,10 @@ import TableList from "../../components/data_page_views/table_list";
 import useFetch from "../../components/hooks/useFetch";
 import { useState, useEffect } from "react";
 import DatasourceList from "../../components/data_page_views/datasource_list";
-// import OpenSourceData_API from "../../utilities/api/openSourceDataApis";
 import { useSelector } from "react-redux";
-import OpenSourceData_API from "../../utilities/api/openSourceDataApis";
+import PrivateData_API from "../../utilities/api/privateDataApis";
 
-const OpenSourcePage = () => {
+const PrivatePage = () => {
     const [searchParams] = useSearchParams();
     const datasource_name = searchParams.get('datasource');
     const datafolder_name = searchParams.get('datafolder');
@@ -24,13 +23,14 @@ const OpenSourcePage = () => {
     const [datafolderError, setDatafolderError] = useState(null);
 
 
+
     useEffect(()=>{
         const fetchDataSources = async () => {
             setDatasourceLoading(true);
             setDatasourceError(null);
 
             try {
-                const data = await OpenSourceData_API.getDataSources(accessToken);
+                const data = await PrivateData_API.getDataSources(accessToken);
                 setDatasourceData(data);
             } catch (error) {
                 setDatasourceError(error);
@@ -44,7 +44,7 @@ const OpenSourcePage = () => {
             setDatasourceError(null);
 
             try {
-                const data = await OpenSourceData_API.getDataFolders(accessToken);
+                const data = await PrivateData_API.getDataFolders(accessToken);
                 setDatafolderData(data);
             } catch (error) {
                 console.log(error);
@@ -57,6 +57,7 @@ const OpenSourcePage = () => {
         fetchDataSources();
         fetchDataFolders();
     },[accessToken])
+
 
     const [filteredDatasourceData, setFilteredDatasourceData] = useState([]);
     const [filteredDatafolderData, setFilteredDatafolderData] = useState([]);
@@ -111,15 +112,15 @@ const OpenSourcePage = () => {
     return (
         <>
             {!datasource_name && !datafolder_name && filteredDatasourceData.length && datafolderData && (
-                <DatabaseList type="Open Source" cardData={{ datasource_data: filteredDatasourceData, data2: datafolderData }} />
+                <DatabaseList type="Private" cardData={{ datasource_data: filteredDatasourceData, data2: datafolderData }} />
             )}
 
             {datafolder_name && (
-                <DatasourceList type="Open Source" datafolder_data={filteredDatafolderData} datafolder_name={datafolder_name} />
+                <DatasourceList type="Private" datafolder_data={filteredDatafolderData} datafolder_name={datafolder_name} />
             )}
 
             {datasource_name && (
-                <TableList type="Open Source" datasource_name={datasource_name} />
+                <TableList type="Private" datasource_name={datasource_name} />
             )}
         </>
     );
@@ -127,4 +128,4 @@ const OpenSourcePage = () => {
 
 
 
-export default OpenSourcePage;
+export default PrivatePage;

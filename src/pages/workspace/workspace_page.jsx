@@ -6,7 +6,7 @@ import DataList from "../../components/workspace/data_list";
 import { WorkspaceData } from "../../assets/dataAsset/dataWorkspace";
 import TemplateList from "../../components/workspace/template_list";
 import { useDispatch } from "react-redux";
-import newReportModalSlice from "../../store/newReportModalSlice";
+import newReportModalSlice from "../../store/slices/newReportModalSlice";
 import NewReportModal from "../../components/modals/newReportModal";
 
 import AddIcon from '@mui/icons-material/Add';

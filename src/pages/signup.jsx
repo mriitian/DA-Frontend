@@ -3,17 +3,22 @@ import axios from "axios";
 import {Grid,Container,TextField,Button} from "@mui/material";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
-import signupSlice from "../store/signupSlice";
+import signupSlice from "../store/slices/signupSlice";
+import Auth_API from "../utilities/api/authApis";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
     const baseURL = import.meta.env.VITE_HOST_HOST_URL;
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const onSubmit = async (values,actions) => {
 
         console.log(values);
         try{
-            const response = await axios.post(baseURL+'auth/register/',values);
+            // const response = await axios.post(baseURL+'auth/register/',values);
+            const response = await Auth_API.register(values);
+            console.log("Res = ",response);
 
             dispatch(signupSlice.actions.setAccount({
                 user:response.data.user,
@@ -22,10 +27,9 @@ const Signup = () => {
             }))
     
             console.log("Signup Done");
-            // navigate("/login")
             actions.resetForm();
+            navigate('/login');
             
-            console.log(response);
         }catch(error){
             console.log(error);
         }
