@@ -3,7 +3,7 @@ import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import { Card, Box, CardContent, Typography, IconButton, Menu,MenuItem,Button } from '@mui/material';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import { useDispatch } from 'react-redux';
-import AccessModalSlice from '../../store/accessModalSlice';
+import AccessModalSlice from '../../store/slices/accessModalSlice';
 import { BorderColor } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';

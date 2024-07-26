@@ -9,6 +9,7 @@ import Login from "./pages/login";
 import EditPage from "./pages/report/edit";
 import ProtectedRoute from "./protected_route";
 import ViewPage from "./pages/report/view";
+import PrivatePage from "./pages/data/private";
 
 export const AppRoutes = () => {
     const routes = [
@@ -23,6 +24,10 @@ export const AppRoutes = () => {
         {
             path:"/browse-data/organizational",
             element: <ProtectedRoute element={<OrgPage/>}/>
+        },
+        {
+            path:"/browse-data/private",
+            element: <ProtectedRoute element={<PrivatePage/>}/>
         },
         {
             path:"/workspace",

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Modal, Box, Stepper, Step, StepLabel, Button } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { Formik, Form } from 'formik';
+import { useFormik, FormikProvider } from 'formik';
 import * as Yup from 'yup';
-import newReportModalSlice from '../../store/newReportModalSlice';
+import newReportModalSlice from '../../store/slices/newReportModalSlice';
 import StepOne from '../forms/step1';
 import StepTwo from '../forms/step2';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ReportDatasourceSlice from '../../store/slices/report_datasources';
 
 const NewReportModal = () => {
     const steps = ['Choose Data', 'Choose Template'];
@@ -37,8 +38,14 @@ const NewReportModal = () => {
     };
 
     const handleBlankClick = () => {
-        navigate(`/report/edit`);
-    }
+
+        dispatch(ReportDatasourceSlice.actions.setDatasources({
+            datasources: formik.values.attachedData
+        }));
+        navigate('/report/edit');
+
+        console.log(formik.values);
+    };
 
     const validationSchema = [
         Yup.object({
@@ -57,6 +64,12 @@ const NewReportModal = () => {
         attachedData: [],
         templateId: ''
     };
+
+    const formik = useFormik({
+        initialValues,
+        validationSchema: validationSchema[activeStep],
+        onSubmit: handleSubmit
+    });
 
     return (
         <Modal open={open} onClose={handleClose}>
@@ -86,42 +99,35 @@ const NewReportModal = () => {
                         </Step>
                     ))}
                 </Stepper>
-                <Formik
-                    initialValues={initialValues}
-                    validationSchema={validationSchema[activeStep]}
-                    onSubmit={handleSubmit}
-                >
-                    {({ isSubmitting }) => (
-                        <Form>
-                            {activeStep === 0 && <StepOne />}
-                            {activeStep === 1 && <StepTwo />}
-                            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                <Button
-                                    color="inherit"
-                                    disabled={activeStep === 0}
-                                    onClick={handleBack}
-                                    sx={{ mr: 1 }}
-                                >
-                                    Back
+                <FormikProvider value={formik}>
+                    <form onSubmit={formik.handleSubmit}>
+                        {activeStep === 0 && <StepOne />}
+                        {activeStep === 1 && <StepTwo />}
+                        <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                            <Button
+                                color="inherit"
+                                disabled={activeStep === 0}
+                                onClick={handleBack}
+                                sx={{ mr: 1 }}
+                            >
+                                Back
+                            </Button>
+                            <Box sx={{ flex: '1 1 auto' }} />
+                            {activeStep === steps.length - 1 ? (
+                                <Button type="submit" disabled={formik.isSubmitting}>
+                                    Submit
                                 </Button>
-                                <Box sx={{ flex: '1 1 auto' }} />
-                                {activeStep === steps.length - 1 ? (
-                                    <Button type="submit" disabled={isSubmitting}>
-                                        Submit
-                                    </Button>
-                                ) : (
-                                    <Button sx= {{border:"1px solid green"}} onClick={handleNext}>
-                                        Choose Template
-                                    </Button>
-                                )}
-
-                                <Button onClick={handleBlankClick} sx={{border:"1px solid black", color:"black", marginLeft:"1%"}}>
-                                    Start from Blank
+                            ) : (
+                                <Button sx={{ border: "1px solid green" }} onClick={handleNext}>
+                                    Choose Template
                                 </Button>
-                            </Box>
-                        </Form>
-                    )}
-                </Formik>
+                            )}
+                            <Button onClick={handleBlankClick} sx={{ border: "1px solid black", color: "black", marginLeft: "1%" }}>
+                                Start from Blank
+                            </Button>
+                        </Box>
+                    </form>
+                </FormikProvider>
             </Box>
         </Modal>
     );

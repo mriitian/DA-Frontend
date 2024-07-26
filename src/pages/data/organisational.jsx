@@ -1,19 +1,62 @@
-import DatabaseList from "../../components/organizational/database_list";
+import DatabaseList from "../../components/data_page_views/database_list";
 import { useSearchParams } from "react-router-dom";
-import TableList from "../../components/organizational/table_list";
+import TableList from "../../components/data_page_views/table_list";
 import useFetch from "../../components/hooks/useFetch";
 import { useState, useEffect } from "react";
-import DatasourceList from "../../components/organizational/datasource_list";
+import DatasourceList from "../../components/data_page_views/datasource_list";
+import OrganizationalData_API from "../../utilities/api/organizationalDataApis";
+import { useSelector } from "react-redux";
+
 
 const OrgPage = () => {
     const [searchParams] = useSearchParams();
     const datasource_name = searchParams.get('datasource');
     const datafolder_name = searchParams.get('datafolder');
 
-    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
+    const accessToken = useSelector(state => state.login.token);
 
-    const { data: datasourceData, loading: datasourceLoading, error: datasourceError } = useFetch(baseURL + `data/datasources/?security_type=organizational`);
-    const { data: datafolderData, loading: datafolderLoading, error: datafolderError } = useFetch(baseURL + `data/datafolder/?security_type=organizational`);
+    const [datasourceData, setDatasourceData] = useState([]);
+    const [datasourceLoading, setDatasourceLoading] = useState(true);
+    const [datasourceError, setDatasourceError] = useState(null);
+
+    const [datafolderData, setDatafolderData] = useState([]);
+    const [datafolderLoading, setDatafolderLoading] = useState(true);
+    const [datafolderError, setDatafolderError] = useState(null);
+
+
+    useEffect(()=>{
+        const fetchDataSources = async () => {
+            setDatasourceLoading(true);
+            setDatasourceError(null);
+
+            try {
+                const data = await OrganizationalData_API.getDataSources(accessToken);
+                setDatasourceData(data);
+            } catch (error) {
+                setDatasourceError(error);
+            } finally {
+                setDatasourceLoading(false);
+            }
+        };
+
+        const fetchDataFolders = async () => {
+            setDatasourceLoading(true);
+            setDatasourceError(null);
+
+            try {
+                const data = await OrganizationalData_API.getDataFolders(accessToken);
+                setDatafolderData(data);
+            } catch (error) {
+                console.log(error);
+                setDatafolderError(error);
+            } finally {
+                setDatafolderLoading(false);
+            }
+        };
+
+        fetchDataSources();
+        fetchDataFolders();
+    },[accessToken])
 
     const [filteredDatasourceData, setFilteredDatasourceData] = useState([]);
     const [filteredDatafolderData, setFilteredDatafolderData] = useState([]);
@@ -51,7 +94,8 @@ const OrgPage = () => {
             setFilteredDatasourceData(arr);
 
             if (datafolder_name) {
-                const arr2 = datasourceData.filter(temp => temp.data_folder !== null);
+                const datafolder_name1 = datafolderData.filter(temp => temp.name == datafolder_name);
+                const arr2 = datasourceData.filter(temp => temp.data_folder == datafolder_name1[0].id);
                 setFilteredDatafolderData(arr2);
             }
         }
@@ -61,7 +105,7 @@ const OrgPage = () => {
         return <div style={styles.spinner}></div>;
     }
 
-    if (datasourceError || datafolderError) {
+    if (datasourceError && datafolderError) {
         console.log(datasourceError);
         return <div  style={styles.error} >Error {datasourceError.message || datafolderError.message}</div>;
     }
@@ -69,15 +113,15 @@ const OrgPage = () => {
     return (
         <>
             {!datasource_name && !datafolder_name && filteredDatasourceData.length && datafolderData && (
-                <DatabaseList cardData={{ datasource_data: filteredDatasourceData, data2: datafolderData }} />
+                <DatabaseList type="Organizational" cardData={{ datasource_data: filteredDatasourceData, data2: datafolderData }} />
             )}
 
             {datafolder_name && (
-                <DatasourceList datafolder_data={filteredDatafolderData} datafolder_name={datafolder_name} />
+                <DatasourceList type="Organizational" datafolder_data={filteredDatafolderData} datafolder_name={datafolder_name} />
             )}
 
             {datasource_name && (
-                <TableList datasource_name={datasource_name} />
+                <TableList type="Organizational" datasource_name={datasource_name} />
             )}
         </>
     );

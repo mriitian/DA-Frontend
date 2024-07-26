@@ -1,21 +1,79 @@
 import { Box, Button, Grid, Modal, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useFetch from "../hooks/useFetch";
 import DataCards from "../cards/dataCards";
+import { useSelector } from "react-redux";
+import DataSelectModal_API from "../../utilities/api/dataSelectModalApis";
 
 const DataSelectModal = ({ open, setOpen, data, setData }) => {
     const handleClose = () => {
         setOpen(false);
     };
 
-    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
+    const accessToken = useSelector(state => state.login.token);
+
+    const [open_data,setOpenData] = useState([]);
+    const [open_loading, setOpenLoading] = useState(true); 
+    const [open_error, setOpenError] = useState(null); 
+
+    const [org_data,setOrgData] = useState([]);
+    const [org_loading, setOrgLoading] = useState(true); 
+    const [org_error, setOrgError] = useState(null); 
+    
+    const [pri_data,setPriData] = useState([]);
+    const [pri_loading, setPriLoading] = useState(true); 
+    const [pri_error, setPriError] = useState(null); 
+
+    useEffect(()=>{
+        const fetchOpenData = async () => {
+            setOpenLoading(true);
+            setOpenError(null);
+
+            try {
+                const data = await DataSelectModal_API.getOpenData(accessToken);
+                setOpenData(data);
+            } catch (error) {
+                setOpenError(error);
+            } finally {
+                setOpenLoading(false);
+            }
+        };
+
+        const fetchOrgData = async () => {
+            setOrgLoading(true);
+            setOrgError(null);
+
+            try {
+                const data = await DataSelectModal_API.getOrgData(accessToken);
+                setOrgData(data);
+            } catch (error) {
+                setOrgError(error);
+            } finally {
+                setOrgLoading(false);
+            }
+        };
+
+        const fetchPrivData = async () => {
+            setPriLoading(true);
+            setPriError(null);
+
+            try {
+                const data = await DataSelectModal_API.getPrivateData(accessToken);
+                setPriData(data);
+            } catch (error) {
+                setPriError(error);
+            } finally {
+                setPriLoading(false);
+            }
+        };
+
+        fetchOpenData();
+        fetchOrgData();
+        fetchPrivData();
+    },[accessToken])
 
     const [dataType, setDataType] = useState('open');
     const [selectedCards, setSelectedCards] = useState([]);
-
-    const { data: open_data, loading: open_loading, error: open_error } = useFetch(baseURL + 'data/datasources?security_type=open-source');
-    const { data: org_data, loading: org_loading, error: org_error } = useFetch(baseURL + 'data/datasources?security_type=organizational');
-    const { data: pri_data, loading: pri_loading, error: pri_error } = useFetch(baseURL + 'data/datasources?security_type=private');
 
     const handleCardClick = (id, datasource_name) => {
         if (selectedCards.some(card => card.id === id)) {
@@ -102,7 +160,7 @@ const DataSelectModal = ({ open, setOpen, data, setData }) => {
                                         onClick={() => handleCardClick(item.id, item.datasource_name)}
                                         key={item.id}
                                         md={3}
-                                        xs={6}
+                                        xs={5}
                                         sx={{
                                             cursor: 'pointer',
                                             border: selectedCards.some(card => card.id === item.id) ? '2px solid #4db6ac' : '2px solid transparent',
@@ -127,7 +185,7 @@ const DataSelectModal = ({ open, setOpen, data, setData }) => {
                                         onClick={() => handleCardClick(item.id, item.datasource_name)}
                                         key={item.id}
                                         md={3}
-                                        xs={6}
+                                        xs={5}
                                         sx={{
                                             cursor: 'pointer',
                                             border: selectedCards.some(card => card.id === item.id) ? '2px solid green' : '2px solid transparent',
@@ -152,7 +210,7 @@ const DataSelectModal = ({ open, setOpen, data, setData }) => {
                                         onClick={() => handleCardClick(item.id, item.datasource_name)}
                                         key={item.id}
                                         md={3}
-                                        xs={6}
+                                        xs={5}
                                         sx={{
                                             cursor: 'pointer',
                                             border: selectedCards.some(card => card.id === item.id) ? '2px solid green' : '2px solid transparent',

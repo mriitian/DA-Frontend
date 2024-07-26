@@ -3,13 +3,12 @@ import axios from "axios";
 import { Grid, TextField, Button, Paper, Typography, Link, styled, IconButton, InputAdornment } from "@mui/material";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import loginSlice from "../store/loginSlice";
+import loginSlice from "../store/slices/loginSlice";
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-
-const baseURL = import.meta.env.VITE_HOST_HOST_URL;
+import Auth_API from "../utilities/api/authApis";
 
 const LoginContainer = styled('div')({
     display: 'flex',
@@ -58,20 +57,25 @@ const SignupLink = styled(Typography)({
     color: '#a2acb6',
 });
 
+const ErrorText = styled(Typography)({
+    marginTop: '10px',
+    color: 'red',
+});
+
 const Login = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-    const navigate = useNavigate();
-
     const onSubmit = async (values, actions) => {
-        console.log(values);
+        setError(''); 
         try {
-            const response = await axios.post(baseURL + 'auth/login/', values);
-
+            const response = await Auth_API.login(values);
+            console.log(response);
             console.log("Logged in");
 
             dispatch(
@@ -85,6 +89,7 @@ const Login = () => {
             actions.resetForm();
             navigate('/browse-data/open-source');
         } catch (error) {
+            setError('Login failed. Please check your email and password and try again.');
             console.log(error);
         }
     };
@@ -154,6 +159,7 @@ const Login = () => {
                             ),
                         }}
                     />
+                    
                     <StyledButton type="submit" variant="contained" fullWidth disabled={isSubmitting}>
                         Login
                     </StyledButton>
@@ -162,6 +168,14 @@ const Login = () => {
                 <SignupLink>
                     Don't have an account yet? <Link href="/signup">Get started now</Link>
                 </SignupLink>
+
+                {error.length && (
+                    <>
+                        {console.log(error)}
+                        <ErrorText>{error}</ErrorText>
+                    </> 
+                    
+                )}
             </LoginPaper>
         </LoginContainer>
     );

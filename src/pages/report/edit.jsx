@@ -12,7 +12,8 @@ import AddComponentButtons from "../../components/buttons/add_component_buttons"
 import ReportDrawer from "../../components/drawers/report_drawer";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import loginSlice from "../../store/loginSlice";
+import loginSlice from "../../store/slices/loginSlice";
+import EditReport_API from "../../utilities/api/editReportApis";
 
 const nodeTypes = {
     rectangle: RectangleNode,
@@ -46,8 +47,6 @@ const EditPage = () => {
 
     const [style, setStyle] = useState({});
 
-    const baseURL = import.meta.env.VITE_HOST_HOST_URL;
-
     const handleSaveClick = async () =>{
         console.log(nodes);
 
@@ -59,16 +58,20 @@ const EditPage = () => {
         });
 
         try{
-            const response = await axios.post(baseURL + 'reports/report/',{
-                report_name: report_name,
-                owner: user.username,
-                nodes: nodes,
-                users_access:[]
-            },{
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            // const response = await axios.post(baseURL + 'reports/report/',{
+            //     report_name: report_name,
+            //     owner: user.username,
+            //     nodes: nodes,
+            //     users_access:[]
+            // },{
+            //     headers: {
+            //         'Authorization': `Bearer ${token}`
+            //     }
+            // });
+
+            // console.log(response);
+
+            const response = await EditReport_API.createReport({accessToken:token,report_name:report_name,owner:user.username,nodes:nodes,users_access:[],template:[1]});
 
             console.log(response);
 

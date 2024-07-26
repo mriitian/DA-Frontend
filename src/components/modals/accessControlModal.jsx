@@ -1,7 +1,7 @@
 import { Modal, Box, Typography, TextField, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import AccessModalSlice from "../../store/accessModalSlice";
+import AccessModalSlice from "../../store/slices/accessModalSlice";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 // Example JSON object for people with access

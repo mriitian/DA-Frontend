@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { WorkspaceData } from '../assets/dataAsset/dataWorkspace';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import loginSlice from '../store/loginSlice';
+import loginSlice from '../store/slices/loginSlice';
 
 export default function Navbar() {
     const theme = useTheme();
@@ -81,7 +81,7 @@ export default function Navbar() {
                                 <ListItemButton onClick={() => setOpen(false)} component={Link} to="/browse-data/organizational">
                                     <ListItemText primary="Organizational" />
                                 </ListItemButton>
-                                <ListItemButton onClick={() => setOpen(false)}>
+                                <ListItemButton onClick={() => setOpen(false)} component={Link} to="/browse-data/private">
                                     <ListItemText primary="Private" />
                                 </ListItemButton>
                             </List>
