@@ -1,39 +1,33 @@
 import { useFormik } from "formik";
 import axios from "axios";
-import {Grid,Container,TextField,Button} from "@mui/material";
+import { Grid, Container, TextField, Button, Typography } from "@mui/material";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
 import signupSlice from "../store/slices/signupSlice";
 import Auth_API from "../utilities/api/authApis";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Signup = () => {
     const baseURL = import.meta.env.VITE_HOST_HOST_URL;
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [serverError, setServerError] = useState('');
 
-    const onSubmit = async (values,actions) => {
-
-        console.log(values);
-        try{
-            // const response = await axios.post(baseURL+'auth/register/',values);
+    const onSubmit = async (values, actions) => {
+        setServerError('');
+        try {
             const response = await Auth_API.register(values);
-            console.log("Res = ",response);
-
             dispatch(signupSlice.actions.setAccount({
-                user:response.data.user,
-                token:response.data.token,
-                refreshToken:response.data.refresh
-            }))
-    
-            console.log("Signup Done");
+                user: response.data.user,
+                token: response.data.token,
+                refreshToken: response.data.refresh
+            }));
             actions.resetForm();
             navigate('/login');
-            
-        }catch(error){
-            console.log(error);
+        } catch (error) {
+            setServerError(error.response?.data?.message || 'An error occurred');
         }
-        
     }
 
     const signup_schema = yup.object().shape({
@@ -56,105 +50,119 @@ const Signup = () => {
         isSubmitting
 
     } = useFormik({
-        initialValues:{
+        initialValues: {
             username: "",
             email: "",
             password: "",
             name: "",
             phone_number: ""
         },
-
         validationSchema: signup_schema,
         onSubmit
-
     })
 
-    return ( 
-        <>
-            <Container>
+    return (
+        <Container 
+            sx={{
+                border:"1px solid black",
+                borderRadius: '30px',
+                marginTop:"3%",
+                padding:"2%"
+            }} 
+            maxWidth="xs"
+        >
             <form noValidate onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Username"
-                        variant="outlined"
-                        name="username"
-                        fullWidth
-                        value={values.username}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        // sx={classes.textField}
-                        error={errors.username && touched.username}
-                    />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Email"
-                        variant="outlined"
-                        name="email"
-                        fullWidth
-                        value={values.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        // sx={classes.textField}
-                        error={errors.email && touched.email}
-                    />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="password"
-                        variant="outlined"
-                        name="password"
-                        value={values.password}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        // sx={classes.textField}
-                        error={errors.password && touched.password}
-                        // fullWidth
-                    />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Name"
-                        variant="outlined"
-                        name="name"
-                        value={values.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        // sx={classes.textField}
-                        error={errors.name && touched.name}
-                        fullWidth
-                    />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Phone Number"
-                        variant="outlined"
-                        name="phone_number"
-                        // type="email"
-                        value={values.phone_number}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        // sx={classes.textField}
-                        error={errors.phone_number && touched.phone_number}
-                        // fullWidth
-                    />
-                    </Grid>
-                    
-                </Grid>
-                <Button
-                    type="submit"
-                    variant="contained"
-                    fullWidth
-                    // sx={classes.buttonStyle}
-                    disabled={isSubmitting}
-                >
+                <Typography variant="h5" component="h1" align="center" gutterBottom>
                     Sign Up
-                </Button>
-                </form>
-            </Container>
-        </>
+                </Typography>
+                <Grid container spacing={2}>
+                    {serverError && (
+                        <Grid item xs={12}>
+                            <Typography color="error" variant="body2">
+                                {serverError}
+                            </Typography>
+                        </Grid>
+                    )}
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Username"
+                            variant="outlined"
+                            name="username"
+                            fullWidth
+                            value={values.username}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={errors.username && touched.username}
+                            helperText={errors.username && touched.username ? errors.username : ''}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Email"
+                            variant="outlined"
+                            name="email"
+                            fullWidth
+                            value={values.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={errors.email && touched.email}
+                            helperText={errors.email && touched.email ? errors.email : ''}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Password"
+                            variant="outlined"
+                            name="password"
+                            type="password"
+                            fullWidth
+                            value={values.password}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={errors.password && touched.password}
+                            helperText={errors.password && touched.password ? errors.password : ''}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Name"
+                            variant="outlined"
+                            name="name"
+                            fullWidth
+                            value={values.name}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={errors.name && touched.name}
+                            helperText={errors.name && touched.name ? errors.name : ''}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Phone Number"
+                            variant="outlined"
+                            name="phone_number"
+                            fullWidth
+                            value={values.phone_number}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            error={errors.phone_number && touched.phone_number}
+                            helperText={errors.phone_number && touched.phone_number ? errors.phone_number : ''}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            fullWidth
+                            disabled={isSubmitting}
+                        >
+                            Sign Up
+                        </Button>
+                    </Grid>
+                </Grid>
+            </form>
+        </Container>
     );
 }
- 
+
 export default Signup;

@@ -42,7 +42,7 @@ export const AppRoutes = () => {
             element: <Login/>
         },
         {
-            path:"/report/edit",
+            path:"/report/edit/:id",
             element: <ProtectedRoute element={<EditPage/>}/>
         },
         {

@@ -14,6 +14,8 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import loginSlice from "../../store/slices/loginSlice";
 import EditReport_API from "../../utilities/api/editReportApis";
+import { useParams } from "react-router-dom";
+import ReportView_API from "../../utilities/api/reportViewApis";
 
 const nodeTypes = {
     rectangle: RectangleNode,
@@ -47,8 +49,39 @@ const EditPage = () => {
 
     const [style, setStyle] = useState({});
 
+    const { id } = useParams();
+    console.log(id);
+
+    const [data,setData] = useState(null);
+    const [loading,setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(()=>{
+        const fetchChartData = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const data1 = await ReportView_API.getReport(token,id);
+                setData(data1);
+
+                setReportName(data1.report_name);
+                setNodes(data1.nodes);
+                console.log(data1);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchChartData();
+
+    },[token])
+
     const handleSaveClick = async () =>{
         console.log(nodes);
+        console.log(data.datasource);
 
         setReport({
             report_name: report_name,
@@ -58,20 +91,7 @@ const EditPage = () => {
         });
 
         try{
-            // const response = await axios.post(baseURL + 'reports/report/',{
-            //     report_name: report_name,
-            //     owner: user.username,
-            //     nodes: nodes,
-            //     users_access:[]
-            // },{
-            //     headers: {
-            //         'Authorization': `Bearer ${token}`
-            //     }
-            // });
-
-            // console.log(response);
-
-            const response = await EditReport_API.createReport({accessToken:token,report_name:report_name,owner:user.username,nodes:nodes,users_access:[],template:[1]});
+            const response = await EditReport_API.createReport({id:id,accessToken:token,report_name:report_name,owner:user.username,nodes:nodes,users_access:[],template:[], datasources:[]});
 
             console.log(response);
 
@@ -221,6 +241,7 @@ const EditPage = () => {
     
     return (
         <ReactFlowProvider>
+            {data && (
             <Box>
                 <Grid container sx={{ margin: "2% 2% 2% 0" }} spacing={2}>
                     <Grid item md={4} xs={4}>
@@ -237,6 +258,7 @@ const EditPage = () => {
                                         color: "grey"
                                     }}
                                     onChange={(e) => setReportName(e.target.value)}
+                                    value={report_name}
                                 />
                             </Grid>
                             <Grid item>
@@ -359,8 +381,10 @@ const EditPage = () => {
                     </Box>
                 </Box>
                 
-                <ReportDrawer nodeId={nodeId} open={drawerOpen} setOpen={setDrawerOpen} nodeType={nodeType} style={style} setStyle={setStyle} handleChartNodeClick={handleChartNodeClick}/>
+                <ReportDrawer nodeId={nodeId} open={drawerOpen} setOpen={setDrawerOpen} nodeType={nodeType} style={style} setStyle={setStyle} handleChartNodeClick={handleChartNodeClick} datasources = {data.datasource}/>
             </Box>
+            )}
+            
         </ReactFlowProvider>
     );
 }

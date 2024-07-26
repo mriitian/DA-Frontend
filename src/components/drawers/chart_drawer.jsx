@@ -6,22 +6,22 @@ import useFetch from "../hooks/useFetch";
 import { useEffect, useState } from "react";
 import DataCards from "../cards/dataCards";
 
-const ChartDrawer = ({ open, setOpen, handleChartNodeClick }) => {
+const ChartDrawer = ({ open, setOpen, handleChartNodeClick,datasources }) => {
     const charts = template2.charts;
     const baseURL = import.meta.env.VITE_HOST_HOST_URL;
     const [selectedChart, setSelectedChart] = useState('');
 
-    const chart_data = useSelector(state => state.report_datasource.datasources);
-    console.log(chart_data);
+    // const chart_data = useSelector(state => state.report_datasource.datasources);
+    // console.log(chart_data);
 
-    let datasources = [];
-    if (chart_data) {
-        datasources = chart_data.map((item) => {
-            const { data, loading, error } = useFetch(baseURL + `data/datasources/${item}`);
-            return data;
-        });
-        console.log(datasources);
-    }
+    // let datasources = [];
+    // if (chart_data) {
+    //     datasources = chart_data.map((item) => {
+    //         const { data, loading, error } = useFetch(baseURL + `data/datasources/${item}`);
+    //         return data;
+    //     });
+    //     console.log(datasources);
+    // }
 
     const handleChange = (event) => {
         const chart = charts.find(c => c.chart_id === event.target.value);

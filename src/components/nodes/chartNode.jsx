@@ -9,7 +9,7 @@ const ChartNode = ({ data, selected }) => {
     return (
         <>
 
-            <NodeResizer isVisible={selected} color="#ff0071" minWidth={100} minHeight={30} />
+            <NodeResizer isVisible={selected} color="#ff0071" minWidth={data.width} minHeight={data.height} />
             {/* <Box sx={{
                 border: "1px solid #222",
                 borderRadius: "5px",
