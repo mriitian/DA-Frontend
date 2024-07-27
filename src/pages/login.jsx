@@ -169,7 +169,7 @@ const Login = () => {
                     Don't have an account yet? <Link href="/signup">Get started now</Link>
                 </SignupLink>
 
-                {error.length && (
+                {error && (
                     <>
                         {console.log(error)}
                         <ErrorText>{error}</ErrorText>

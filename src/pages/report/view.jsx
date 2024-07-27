@@ -78,6 +78,11 @@ const ViewPage = () => {
                 width:node.width,
                 draggable: false,
                 selectable: false,
+                data:{
+                    ...node.data,
+                    width: node.width,
+                    height: node.height
+                }
     
             })));
         }

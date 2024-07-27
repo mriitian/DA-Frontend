@@ -8,6 +8,7 @@ import StepOne from '../forms/step1';
 import StepTwo from '../forms/step2';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReportDatasourceSlice from '../../store/slices/report_datasources';
+import ReportModal_API from '../../utilities/api/reportModalApis';
 
 const NewReportModal = () => {
     const steps = ['Choose Data', 'Choose Template'];
@@ -16,6 +17,9 @@ const NewReportModal = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const currentURL = useLocation().pathname;
+
+    const token = useSelector(state => state.login.token);
+    const user = useSelector(state => state.login.user);
 
     const handleClose = () => {
         dispatch(newReportModalSlice.actions.setOpen({ open: false }));
@@ -29,22 +33,62 @@ const NewReportModal = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const handleSubmit = (values) => {
-        // Make your post request here
+    const handleSubmit = async (values) => {
         console.log(values);
-        // Example: axios.post('/api/report', values);
-        setActiveStep(0);
-        handleClose();
+
+        const report_name = values.name;
+        const description = values.description;
+        const owner = user.username;
+        const nodes = [];
+        const template = [values.templateId];
+        const datasources = values.attachedData;
+
+        try{
+            const response = await ReportModal_API.createReport({accessToken:token,report_name:report_name,owner:user.username,nodes:[],users_access:[],template:template, datasources:datasources});
+
+            console.log(response);
+            
+            setActiveStep(0);
+            handleClose();
+            navigate(`/report/edit/${response.id}`);
+
+        }
+
+        catch(err){
+            console.log(err);
+        }
+
     };
 
-    const handleBlankClick = () => {
+    const handleBlankClick = async () => {
+
+        const report_name = formik.values.name;
+        const description = formik.values.description;
+        const owner = user.username;
+        const nodes = [];
+        const template = [];
+        const datasources = formik.values.attachedData;
+
+        console.log(report_name);
 
         dispatch(ReportDatasourceSlice.actions.setDatasources({
             datasources: formik.values.attachedData
         }));
-        navigate('/report/edit');
 
-        console.log(formik.values);
+        try{
+            const response = await ReportModal_API.createReport({accessToken:token,report_name:report_name,owner:user.username,nodes:[],users_access:[],template:template, datasources:datasources});
+
+            console.log(response.data);
+            setActiveStep(0);
+            handleClose();
+            navigate(`/report/edit/${response.id}`);
+
+        }
+
+        catch(err){
+            console.log(err);
+        }
+
     };
 
     const validationSchema = [
