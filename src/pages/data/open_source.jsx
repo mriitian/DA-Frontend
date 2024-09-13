@@ -23,6 +23,7 @@ const OpenSourcePage = () => {
     const [datafolderLoading, setDatafolderLoading] = useState(true);
     const [datafolderError, setDatafolderError] = useState(null);
 
+    console.log('OpenSourcePage Opened');
 
     useEffect(()=>{
         const fetchDataSources = async () => {
@@ -107,6 +108,12 @@ const OpenSourcePage = () => {
     if (datasourceError && datafolderError) {
         return <div  style={styles.error} >Error {datasourceError.message || datafolderError.message}</div>;
     }
+
+    console.log('Data Sources:', datasourceData);
+    console.log('Data Folders:', datafolderData);
+
+    console.log('filteredDatasourceData:', filteredDatasourceData);
+    console.log('datafolderData:', datafolderData);
 
     return (
         <>

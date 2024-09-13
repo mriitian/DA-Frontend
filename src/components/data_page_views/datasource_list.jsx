@@ -14,6 +14,8 @@ const DatasourceList = ({type, datafolder_name,datafolder_data}) => {
 
     // console.log(prevPath); 
 
+    console.log('DatasourceList Opened');
+
     return ( 
         <>
             <AccessControlModal />

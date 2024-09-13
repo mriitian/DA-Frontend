@@ -12,6 +12,8 @@ import { useSelector } from "react-redux";
 
 const DatabaseList = ({type, cardData}) => {
 
+    console.log('DatabaseList Opened',cardData);
+
     const [brandData,setBrandData] = useState([]);
     const [loading,setLoading] = useState(true);
     const [error,setError] = useState(null);

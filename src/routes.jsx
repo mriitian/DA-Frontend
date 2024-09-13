@@ -16,7 +16,7 @@ export const AppRoutes = () => {
   const routes = [
     {
       path: "/home",
-      element: <HomePage />,
+      element: <ProtectedRoute element={<HomePage />} />,
     },
     {
       path: "/browse-data/open-source",
