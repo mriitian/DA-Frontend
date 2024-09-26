@@ -44,8 +44,12 @@ export const AppRoutes = () => {
       path: '/login',
       element: <Login />,
     },
+    // {
+    //   path: '/report/edit',
+    //   element: <ProtectedRoute element={<EditPage />} />,
+    // },
     {
-      path: '/report/edit',
+      path: '/report/:report_name/edit',
       element: <ProtectedRoute element={<EditPage />} />,
     },
     {
