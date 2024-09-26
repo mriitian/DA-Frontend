@@ -7,9 +7,8 @@ import ChartNode from "../../components/nodes/chartNode";
 import 'reactflow/dist/style.css';
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import useFetch from "../../components/hooks/useFetch";
 import { useEffect, useRef, useState } from "react";
-import ReportView_API from "../../utilities/api/reportViewApis";
+import ReportAPIs from "../../utilities/api/reports/ReportAPIs";
 
 const nodeTypes = {
     rectangle: RectangleNode,
@@ -44,17 +43,19 @@ const ViewPage = () => {
         setNodes([]);
     }, []);
 
-    const [data,setData] = useState(null);
-    const [loading,setLoading] = useState(true);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(()=>{
+    useEffect(() => {
         const fetchChartData = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                const data1 = await ReportView_API.getReport(token,report_name);
+                // Fetch report details using the new ReportAPIs method
+                const data1 = await ReportAPIs.getDetail(report_name);
+                console.log("Fetched Data: ", data1);
                 setData(data1);
             } catch (error) {
                 setError(error);
@@ -65,32 +66,68 @@ const ViewPage = () => {
 
         fetchChartData();
 
-    },[token])
-
+    }, [report_name])
 
     useEffect(() => {
         if (data) {
-            setNodes(data.nodes.map((node) => ({
-                ...node,
-                id: node.id || node.node_name,
-                position: node.position || { x: 0, y: 0 },
-                height:node.height,
-                width:node.width,
-                draggable: false,
-                selectable: false,
-                data:{
-                    ...node.data,
-                    width: node.width,
-                    height: node.height
+            // Update the nodes with parsed data and position
+            setNodes(data.nodes.map((node) => {
+                let parsedPosition = { x: 0, y: 0 };
+                let parsedData = {};
+    
+                // Check if position is a string and then parse it, otherwise use it directly
+                if (typeof node.position === 'string') {
+                    try {
+                        // Convert to valid JSON string format
+                        let formattedPosition = node.position.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":');
+                        parsedPosition = JSON.parse(formattedPosition);
+                    } catch (e) {
+                        console.error('Error parsing node position:', node.position);
+                        return null; // Skip this node
+                    }
+                } else if (typeof node.position === 'object' && node.position !== null) {
+                    parsedPosition = node.position;
                 }
     
-            })));
+                // Check if data is a string and then parse it, otherwise use it directly
+                if (typeof node.data === 'string') {
+                    try {
+                        // Transform to valid JSON format
+                        let formattedData = node.data
+                            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":') // Add double quotes around property names
+                            .replace(/'([^']+)'/g, '"$1"') // Convert single quotes to double quotes for string values
+                            .replace(/ƒ/g, 'null'); // Replace function placeholders with null or appropriate value
+    
+                        parsedData = JSON.parse(formattedData);
+                    } catch (e) {
+                        console.error('Error parsing node data:', node.data);
+                        return null; // Skip this node
+                    }
+                } else if (typeof node.data === 'object' && node.data !== null) {
+                    parsedData = node.data;
+                }
+    
+                return {
+                    ...node,
+                    id: node.id || node.node_name,
+                    position: parsedPosition,
+                    height: node.height,
+                    width: node.width,
+                    draggable: false,
+                    selectable: false,
+                    data: {
+                        ...parsedData,
+                        width: node.width,
+                        height: node.height
+                    }
+                };
+            }).filter(node => node !== null)); // Filter out any null nodes
         }
-    }, [data]);
+    }, [data]);    
 
-    useEffect(()=>{
-        console.log(nodes);
-    },[nodes])
+    useEffect(() => {
+        console.log("Nodes State:", nodes);
+    }, [nodes]);
 
     const mainContentStyles = {
         width: "100%",
@@ -196,7 +233,6 @@ const ViewPage = () => {
                             <ReactFlow
                                 nodes={nodes}
                                 edges={edges}
-                                // onNodesChange={onNodesChange}
                                 onEdgesChange={onEdgesChange}
                                 nodeTypes={nodeTypes}
                                 fitView
@@ -205,7 +241,6 @@ const ViewPage = () => {
                                 zoomOnDoubleClick={false}
                                 panOnScroll={false}
                                 panOnDrag={true}
-                                // defaultNodeOptions={{ draggable: false, selectable: false }}
                             >
                                 <MiniMap nodeStrokeWidth={6} zoomable pannable />
                             </ReactFlow>

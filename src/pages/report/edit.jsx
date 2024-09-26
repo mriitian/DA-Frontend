@@ -1,21 +1,17 @@
-import { Button, Grid, Typography, Box, Menu, MenuItem, Drawer, Divider, List, ListItemButton, TextField, AppBar } from "@mui/material";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Grid, TextField, Box } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
-import ReactFlow, { addEdge, ReactFlowProvider, useNodesState, useEdgesState, useKeyPress, MiniMap } from 'reactflow';
-import RectangleNode from "../../components/nodes/rect_node";
-import { useEffect, useState, useRef } from "react";
+import ReactFlow, { addEdge, ReactFlowProvider, useNodesState, useEdgesState, MiniMap } from 'reactflow';
 import 'reactflow/dist/style.css';
-import TextNode from "../../components/nodes/text_node";
-import { template2 } from "../../assets/dataAsset/data_template";
-import ChartNode from "../../components/nodes/chartNode";
-import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
-import AddComponentButtons from "../../components/buttons/add_component_buttons";
-import ReportDrawer from "../../components/drawers/report_drawer";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import loginSlice from "../../store/slices/loginSlice";
-import EditReport_API from "../../utilities/api/editReportApis";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import ReportView_API from "../../utilities/api/reportViewApis";
+import ReportDrawer from "../../components/drawers/report_drawer";
+import AddComponentButtons from "../../components/buttons/add_component_buttons";
+import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
+import RectangleNode from "../../components/nodes/rect_node";
+import TextNode from "../../components/nodes/text_node";
+import ChartNode from "../../components/nodes/chartNode";
+import ReportAPIs from "../../utilities/api/reports/ReportAPIs";
 
 const nodeTypes = {
     rectangle: RectangleNode,
@@ -23,49 +19,36 @@ const nodeTypes = {
     chart: ChartNode
 };
 
-const charts = template2.charts;
-
 const initialEdges = [];
 
 const EditPage = () => {
-
     const user = useSelector(state => state.login.user);
     const token = useSelector(state => state.login.token);
+    const { report_name } = useParams(); // Access report_name from URL
 
     const [report, setReport] = useState(null);
-
-    const [report_name, setReportName] = useState(null);
-   
+    const [reportName, setReportName] = useState(report_name); // Initialize with report_name from URL
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const onConnect = (params) => setEdges((eds) => addEdge(params, eds));
-    
     const [nodeType, setNodeType] = useState(null);
-
     const flowWrapper = useRef(null);
-
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [nodeId, setNodeId] = useState(null);
-
     const [style, setStyle] = useState({});
-
-    const { id } = useParams();
-    console.log(id);
-
-    const [data,setData] = useState(null);
-    const [loading,setLoading] = useState(true);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(()=>{
+    useEffect(() => {
         const fetchChartData = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                const data1 = await ReportView_API.getReport(token,id);
+                const data1 = await ReportAPIs.getDetail(report_name); // Fetch report details using report_name
                 setData(data1);
-
-                setReportName(data1.report_name);
+                setReportName(data1.report_name); // Update report name from fetched data
                 setNodes(data1.nodes);
                 console.log(data1);
             } catch (error) {
@@ -76,67 +59,60 @@ const EditPage = () => {
         };
 
         fetchChartData();
+    }, [report_name]);
 
-    },[token])
-
-    const handleSaveClick = async () =>{
+    const handleSaveClick = async () => {
         console.log(nodes);
         console.log(data.datasource);
 
         setReport({
-            report_name: report_name,
+            report_name: reportName,
             owner: user.username,
             nodes: nodes,
-            users_access:[]
+            users_access: []
         });
 
-        try{
-            const response = await EditReport_API.createReport({id:id,accessToken:token,report_name:report_name,owner:user.username,nodes:nodes,users_access:[],template:[], datasources:[]});
-
-            console.log(response);
-
+        try {
+            // Assume that updateReport function can use report_name instead of an id
+            const response = await ReportAPIs.updateReport(report_name, {
+                report_name: reportName,
+                owner: user.username,
+                nodes: nodes,
+                users_access: [],
+                template: [],
+                datasources: []
+            });
+            console.log('Updated Report:', response);
+        } catch (err) {
+            console.log('Error saving the report:', err);
         }
-
-        catch(err){
-            console.log(err);
-        }
-    }
+    };
 
     const handleComponentClick = (type) => {
-       
         setDrawerOpen(false);
+        setNodeType(type);
+        setNodeId(`${type}_${nodes.length + 1}`);
 
-        // setTimeout(() => {
-            setNodeType(type);
-            setNodeId(`${type}_${nodes.length + 1}`);
+        const flowWrapperRect = flowWrapper.current.getBoundingClientRect();
+        const centerX = flowWrapperRect.width / 2;
+        const centerY = flowWrapperRect.height / 2;
 
-            const flowWrapperRect = flowWrapper.current.getBoundingClientRect();
-            const centerX = flowWrapperRect.width / 2;
-            const centerY = flowWrapperRect.height / 2;
+        if (type !== "chart") {
+            const newNode = {
+                id: `${type}_${nodes.length + 1}`,
+                node_name: `${type}_${nodes.length + 1}`,
+                type: type,
+                position: { x: centerX, y: centerY },
+                data: { label: `${type} ${nodes.length + 1}`, setNodes: setNodes, styles: style, type: type },
+            };
 
-            if(type !== "chart"){
-                const newNode = {
-                    id: `${type}_${nodes.length + 1}`,
-                    node_name: `${type}_${nodes.length + 1}`,
-                    type: type,
-                    position: {
-                        x: centerX,
-                        y: centerY 
-                    },
-                    data: { label: `${type} ${nodes.length + 1}`, setNodes: setNodes, styles: style, type: type },
-                };
+            setNodes((nds) => nds.concat(newNode));
+        }
 
-                setNodes((nds) => nds.concat(newNode));
-            }
+        if (type !== 'rectangle') setDrawerOpen(true);
+    };
 
-            if(type !== 'rectangle')
-                setDrawerOpen(true);
-        // }, 30); 
-
-    }
     const handleChartNodeClick = (chart) => {
-
-        // console.log(chart);
         const flowWrapperRect = flowWrapper.current.getBoundingClientRect();
         const centerX = flowWrapperRect.width / 2;
         const centerY = flowWrapperRect.height / 2;
@@ -147,18 +123,14 @@ const EditPage = () => {
         const newChart = {
             id: `chart_${nodes.length + 1}`,
             type: 'chart',
-            node_name:`chart_${nodes.length + 1}`,
-            position: {
-                x: centerX,
-                y: centerY 
-            },
-            data: { label: `Chart ${nodes.length + 1}`, chartData: chart},
+            node_name: `chart_${nodes.length + 1}`,
+            position: { x: centerX, y: centerY },
+            data: { label: `Chart ${nodes.length + 1}`, chartData: chart },
         };
 
         setNodes((nds) => nds.concat(newChart));
-        // handleClose();
-    }
-    
+    };
+
     const handleDeleteNode = () => {
         setNodes((nds) => nds.filter(node => !node.selected));
     };
@@ -193,130 +165,106 @@ const EditPage = () => {
         if (selectedNode) {
             setDrawerOpen(false);
             setNodeType(selectedNode.type);
-            setNodeId(selectedNode.id)
-
-            if (selectedNode.type !== 'rectangle')
-                setDrawerOpen(true);
-            // },30);
+            setNodeId(selectedNode.id);
+            if (selectedNode.type !== 'rectangle') setDrawerOpen(true);
         }
     }, [nodes]);
-    
 
-    const addComponent= [
-        {"text":"Add Charts","icon":"chart","type":"chart"},
-        {"text":"Line","icon":"line","type":"line"},
-        {"text":"Rectangle","icon":"rect","type":"rectangle"},
-        {"text":"Text Box","icon":"text","type":"text"},
-    ]
+    const addComponent = [
+        { "text": "Add Charts", "icon": "chart", "type": "chart" },
+        { "text": "Line", "icon": "line", "type": "line" },
+        { "text": "Rectangle", "icon": "rect", "type": "rectangle" },
+        { "text": "Text Box", "icon": "text", "type": "text" },
+    ];
 
     const mainContentStyles = {
         width: drawerOpen ? "80%" : "100%",
         backgroundColor: "white",
         border: "1px solid #D3D3D3",
         boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-        height: `calc(100% - 64px)`, // Adjust this value based on the height of the second bar
+        height: `calc(100% - 64px)`,
         position: "relative",
         overflow: "auto",
         borderRadius: "15px",
-        marginTop: "2%"  // Add this line to create space below the top bar
+        marginTop: "2%"
     };
 
     const buttonStyles = {
-            borderRadius: '6px',
-            textTransform: 'none',
-            backgroundColor: '#00bfa5',
-            color: 'white',
-            minWidth: '80px',
-            minHeight: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '11px',
-            '&:hover': {
-                backgroundColor: '#008c75'
-            },
-            // marginRight:"3%"
+        borderRadius: '6px',
+        textTransform: 'none',
+        backgroundColor: '#00bfa5',
+        color: 'white',
+        minWidth: '80px',
+        minHeight: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '11px',
+        '&:hover': {
+            backgroundColor: '#008c75'
+        },
     };
 
-    
     return (
         <ReactFlowProvider>
             {data && (
-            <Box>
-                <Grid container sx={{ margin: "2% 2% 2% 0" }} spacing={2}>
-                    <Grid item md={4} xs={4}>
-                        <Grid container alignItems="center">
-                            <Grid item>
-                                <TextField
-                                    id="standard-basic"
-                                    variant="standard"
-                                    defaultValue="Untitled Report"
-                                    sx={{
-                                        fontSize: '1.3rem',
-                                        fontWeight: 'bolder',
-                                        marginRight: '8px',
-                                        color: "grey"
-                                    }}
-                                    onChange={(e) => setReportName(e.target.value)}
-                                    value={report_name}
-                                />
-                            </Grid>
-                            <Grid item>
-                                <DriveFileRenameOutlineOutlinedIcon
-                                    sx={{
-                                        fontSize: '1.4rem',
-                                        cursor: 'pointer',
-                                        color: "grey"
-                                    }}
-                                />
+                <Box>
+                    <Grid container sx={{ margin: "2% 2% 2% 0" }} spacing={2}>
+                        <Grid item md={4} xs={4}>
+                            <Grid container alignItems="center">
+                                <Grid item>
+                                    <TextField
+                                        id="standard-basic"
+                                        variant="standard"
+                                        defaultValue="Untitled Report"
+                                        sx={{
+                                            fontSize: '1.3rem',
+                                            fontWeight: 'bolder',
+                                            marginRight: '8px',
+                                            color: "grey"
+                                        }}
+                                        onChange={(e) => setReportName(e.target.value)}
+                                        value={reportName} // Use reportName state
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <DriveFileRenameOutlineOutlinedIcon
+                                        sx={{
+                                            fontSize: '1.4rem',
+                                            cursor: 'pointer',
+                                            color: "grey"
+                                        }}
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
-                    </Grid>
 
-                    <Grid item md={8} xs={8} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                            {addComponent.map((but) => (
-                                <AddComponentButtons key={but.text} text={but.text} icon={but.icon} type={but.type} onClick={handleComponentClick} />
-                            ))}
-                        </Box>
+                        <Grid item md={8} xs={8} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                {addComponent.map((but) => (
+                                    <AddComponentButtons key={but.text} text={but.text} icon={but.icon} type={but.type} onClick={handleComponentClick} />
+                                ))}
+                            </Box>
 
-                        <Box sx={{ display: 'flex', gap: 1, marginRight:"3%"}}>
-                            <Button
-                                sx={buttonStyles}
-                                onClick={handleSaveClick}
-                                variant="contained"
-                                startIcon={
-                                    <AddIcon
-                                        sx={{
-                                            border: "1px solid white",
-                                            borderRadius: "5px",
-                                            height: "20px",
-                                            width: "20px"
-                                        }}
-                                    />
-                                }
-                            >
-                                Save
-                            </Button>
+                            <Box sx={{ display: 'flex', gap: 1, marginRight: "3%" }}>
+                                <Button
+                                    sx={buttonStyles}
+                                    onClick={handleSaveClick}
+                                    variant="contained"
+                                    startIcon={
+                                        <AddIcon
+                                            sx={{
+                                                border: "1px solid white",
+                                                borderRadius: "5px",
+                                                height: "20px",
+                                                width: "20px"
+                                            }}
+                                        />
+                                    }
+                                >
+                                    Save
+                                </Button>
 
-                            <Button
-                                sx={buttonStyles}
-                                variant="contained"
-                                startIcon={
-                                    <AddIcon
-                                        sx={{
-                                            border: "1px solid white",
-                                            borderRadius: "5px",
-                                            height: "20px",
-                                            width: "20px"
-                                        }}
-                                    />
-                                }
-                            >
-                                Add Template
-                            </Button>
-
-                            {drawerOpen && (
                                 <Button
                                     sx={buttonStyles}
                                     variant="contained"
@@ -330,63 +278,79 @@ const EditPage = () => {
                                             }}
                                         />
                                     }
-                                    onClick={() => setDrawerOpen(false)}
                                 >
-                                    Exit
+                                    Add Template
                                 </Button>
-                            )}
-                        </Box>
+
+                                {drawerOpen && (
+                                    <Button
+                                        sx={buttonStyles}
+                                        variant="contained"
+                                        startIcon={
+                                            <AddIcon
+                                                sx={{
+                                                    border: "1px solid white",
+                                                    borderRadius: "5px",
+                                                    height: "20px",
+                                                    width: "20px"
+                                                }}
+                                            />
+                                        }
+                                        onClick={() => setDrawerOpen(false)}
+                                    >
+                                        Exit
+                                    </Button>
+                                )}
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Box
-                    sx={{
-                        margin: "2% 0% 0 0%",
-                        padding: "2%",
-                        backgroundColor: "#E0E0E0",
-                        border: "1px solid #D3D3D3",
-                        height:"100vh",
-                        overflowY: "auto",
-                    }}
-                >
                     <Box
-                        ref={flowWrapper}
                         sx={{
-                            ...mainContentStyles,
-                            width: drawerOpen ? "80%" : "100%",
-                            backgroundColor: "white",
+                            margin: "2% 0% 0 0%",
+                            padding: "2%",
+                            backgroundColor: "#E0E0E0",
                             border: "1px solid #D3D3D3",
-                            boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-                            height: "100%",
-                            position: "relative",
-                            overflow: "auto",
-                            borderRadius: "15px"
+                            height: "100vh",
+                            overflowY: "auto",
                         }}
                     >
-                        <ReactFlow
-                            nodes={nodes}
-                            edges={edges}
-                            onNodesChange={onNodesChange}
-                            onEdgesChange={onEdgesChange}
-                            onConnect={onConnect}
-                            nodeTypes={nodeTypes}
-                            // fitView
-                            zoomOnScroll={false}
-                            zoomOnPinch={true}
-                            zoomOnDoubleClick={false}
-                            panOnScroll={false}
-                            panOnDrag={true}
+                        <Box
+                            ref={flowWrapper}
+                            sx={{
+                                ...mainContentStyles,
+                                width: drawerOpen ? "80%" : "100%",
+                                backgroundColor: "white",
+                                border: "1px solid #D3D3D3",
+                                boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                                height: "100%",
+                                position: "relative",
+                                overflow: "auto",
+                                borderRadius: "15px"
+                            }}
                         >
-                            <MiniMap nodeStrokeWidth={6} zoomable pannable />
-                        </ReactFlow>
+                            <ReactFlow
+                                nodes={nodes}
+                                edges={edges}
+                                onNodesChange={onNodesChange}
+                                onEdgesChange={onEdgesChange}
+                                onConnect={onConnect}
+                                nodeTypes={nodeTypes}
+                                zoomOnScroll={false}
+                                zoomOnPinch={true}
+                                zoomOnDoubleClick={false}
+                                panOnScroll={false}
+                                panOnDrag={true}
+                            >
+                                <MiniMap nodeStrokeWidth={6} zoomable pannable />
+                            </ReactFlow>
+                        </Box>
                     </Box>
+
+                    <ReportDrawer nodeId={nodeId} open={drawerOpen} setOpen={setDrawerOpen} nodeType={nodeType} style={style} setStyle={setStyle} handleChartNodeClick={handleChartNodeClick} datasources={data.datasource} />
                 </Box>
-                
-                <ReportDrawer nodeId={nodeId} open={drawerOpen} setOpen={setDrawerOpen} nodeType={nodeType} style={style} setStyle={setStyle} handleChartNodeClick={handleChartNodeClick} datasources = {data.datasource}/>
-            </Box>
             )}
-            
         </ReactFlowProvider>
     );
-}
+};
 
 export default EditPage;
