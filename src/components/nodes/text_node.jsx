@@ -3,24 +3,23 @@ import { NodeResizer } from 'reactflow';
 import { Box } from '@mui/material';
 
 const TextNode = ({ data, id, selected }) => {
-    const [val, setVal] = useState(data.label);
+    const [val, setVal] = useState(data.label || ""); // Default to empty string if label is undefined
     const [styles, setStyles] = useState({
         textAlign: "left",
         fontSize: "16px",
         color: "black"
     });
 
-    // console.log(id,data);
-
-
-    const [bold,setBold] = useState(false);
+    const [bold, setBold] = useState(false);
     const [underlined, setUnderlined] = useState(false);
-    const [italic,setItalic] = useState(false);
+    const [italic, setItalic] = useState(false);
 
-    const setNodes = data.setNodes;
+    const setNodes = data.setNodes; // Ensure data.setNodes is a valid function
 
     useEffect(() => {
-        setVal(data.label);
+        if (data.label) {
+            setVal(data.label); // Update value when data.label changes
+        }
     }, [data.label]);
 
     const handleChange = (e) => {
@@ -34,40 +33,22 @@ const TextNode = ({ data, id, selected }) => {
     };
 
     useEffect(() => {
-        
-        // console.log(data.styles);
-        // if (data.styles.get(id)) {
-        //     setStyles(data.styles.get(id));
+        // Check if data.styles is defined and has the property for this node
+        if (data.styles && data.styles[id]) {
+            const arr = data.styles[id].formats || []; // Default to empty array if formats is undefined
 
-        //     const arr = data.styles.get(id).formats;
-
-        //     arr.includes('bold')?setBold(true):setBold(false);
-        //     arr.includes('underlined')?setUnderlined(true):setUnderlined(false);
-        //     arr.includes('italic')?setItalic(true):setItalic(false);
-        // }
-
-        if(data.styles.hasOwnProperty(id)){
-            const arr = data.styles[id].formats;
-
-            // console.log(data.styles[id]);
-
-            setStyles(data.styles[id]);
-
-            arr.includes('bold')?setBold(true):setBold(false);
-            arr.includes('underlined')?setUnderlined(true):setUnderlined(false);
-            arr.includes('italic')?setItalic(true):setItalic(false);
+            setStyles(data.styles[id]); // Apply styles
+            setBold(arr.includes('bold'));
+            setUnderlined(arr.includes('underlined'));
+            setItalic(arr.includes('italic'));
         }
-
-        // console.log(typeof(data.styles));
-    }, [data.styles]);
+    }, [data.styles, id]); // Include id as a dependency
 
     return (
         <>
             <NodeResizer color="#ff0071" isVisible={selected} minWidth={100} minHeight={30} />
             <Box
                 sx={{
-                    // border: "1px solid #222",
-                    // borderRadius: "5px",
                     width: "100%",
                     height: "100%",
                     overflow: "hidden",
@@ -84,16 +65,15 @@ const TextNode = ({ data, id, selected }) => {
                         border: 'none',
                         background: 'transparent',
                         textAlign: styles.textAlign,
-                        fontSize: styles.fontSize, // Only font size changes
+                        fontSize: styles.fontSize,
                         color: styles.color,
                         padding: '5px',
                         boxSizing: 'border-box',
                         resize: 'none',
                         outline: 'none',
-                        fontWeight: bold?'bold':'normal',
-                        fontStyle: italic?'italic':'normal',
-                        textDecoration: underlined?'underline':'normal'
-
+                        fontWeight: bold ? 'bold' : 'normal',
+                        fontStyle: italic ? 'italic' : 'normal',
+                        textDecoration: underlined ? 'underline' : 'normal'
                     }}
                 />
             </Box>
