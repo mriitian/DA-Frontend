@@ -30,7 +30,7 @@ const ReportAPIs = {
     // Method to create a new report
     async createReport(data) {
         try {
-            const response = await axiosApiService.post('reports/reports/', data);
+            const response = await axiosApiService.post('reports/report/', data);
             return response.data;
         } catch (error) {
             console.error('Error creating a new report:', error);
