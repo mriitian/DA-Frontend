@@ -1,12 +1,28 @@
-import DataCards from "../cards/dataCards";
-import { Box, Grid, Typography, Select, InputLabel, FormControl, MenuItem, Button, IconButton } from "@mui/material";
-import AccessControlModal from "../modals/accessControlModal";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import {
+  Box,
+  Grid,
+  Typography,
+  Select,
+  InputLabel,
+  FormControl,
+  MenuItem,
+  Button,
+  Popover,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import DatabaseIcon from '@mui/icons-material/Storage'; // Icon for Database
+import FileIcon from '@mui/icons-material/InsertDriveFile'; // Icon for File
+import DataCards from "../cards/dataCards";
 import DataFolderCards from "../cards/datafolderCards";
+import AccessControlModal from "../modals/accessControlModal";
 import DataPage_API from "../../utilities/api/dataPageApis"; // Ensure this API utility is available
-import { useSelector } from "react-redux";
 
 const DatabaseList = ({ type, cardData }) => {
     // Debugging log to verify the component is receiving props correctly
@@ -64,6 +80,23 @@ const DatabaseList = ({ type, cardData }) => {
     const [filt_datasources, setFilt_datasources] = useState(datasources);
     const [filt_datafolders, setFilt_datafolders] = useState(datafolders);
 
+    // Popover state for 'New' button
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    // Function to handle opening of the popover
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    // Function to handle closing of the popover
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    // Boolean to check if popover is open
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+
     // Effect to update filtered data based on selected brand and data channel
     useEffect(() => {
         if (dataChannel.length === 0 && brand.length === 0) {
@@ -99,25 +132,31 @@ const DatabaseList = ({ type, cardData }) => {
         return <div style={{ textAlign: 'center', margin: '20px' }}>Loading...</div>;
     }
 
-    // Show an error message if there's an issue fetching brand data
-    // if (error) {
-    //     return <div style={{ textAlign: 'center', margin: '20px', color: 'red' }}>Error: {error.message}</div>;
-    // }
-
-    // Show a message if there's no filtered data available
-    // if (filt_datasources.length === 0 && filt_datafolders.length === 0) {
-    //     return <div style={{ textAlign: 'center', margin: '20px', color: 'red' }}>No data available</div>;
-    // }
-
     return (
         <>
-            <Grid container sx={{ margin: "20px 0 10px 0" }}>
-                <Grid item xs={9}>
+            <Grid container alignItems="center" sx={{ margin: "20px 0 10px 0", }}>
+                <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            color: "grey",
+                            fontWeight: "550",
+                            fontFamily: "sans-serif",
+                            marginLeft: "2%",
+                        }}
+                    >
+                        {type} Data
+                    </Typography>
+                </Grid>
+
+                <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <FormControl
                         variant="outlined"
                         sx={{
-                            width: '40%',
-                            margin: 'auto 2% auto 2%',
+                            width: '30%',
+                            margin: '0 1%',
+                            border: '1px solid grey',
+                            borderRadius: '12px', 
                         }}
                     >
                         <InputLabel>Choose a brand</InputLabel>
@@ -126,6 +165,11 @@ const DatabaseList = ({ type, cardData }) => {
                             onChange={handleBrandChange}
                             label="Choose a brand"
                             IconComponent={KeyboardArrowDownIcon}
+                            sx={{
+                                '& fieldset': {
+                                    border: 'none', // Remove the default border of the Select component
+                                },
+                            }}
                         >
                             <MenuItem value="">
                                 <em>None</em>
@@ -139,8 +183,10 @@ const DatabaseList = ({ type, cardData }) => {
                     <FormControl
                         variant="outlined"
                         sx={{
-                            width: '40%',
-                            margin: '0 2% 0 2%'
+                            width: '30%',
+                            margin: '0 1%',
+                            border: '1px solid grey',
+                            borderRadius: '12px', 
                         }}>
                         <InputLabel>Choose a data channel</InputLabel>
                         <Select
@@ -148,6 +194,11 @@ const DatabaseList = ({ type, cardData }) => {
                             onChange={handleDataChannelChange}
                             label="Choose a data channel"
                             IconComponent={KeyboardArrowDownIcon}
+                            sx={{
+                                '& fieldset': {
+                                    border: 'none', // Remove the default border of the Select component
+                                },
+                            }}
                         >
                             <MenuItem value="">
                                 <em>None</em>
@@ -157,14 +208,13 @@ const DatabaseList = ({ type, cardData }) => {
                             ))}
                         </Select>
                     </FormControl>
-                </Grid>
-                    { type!=="Open Source" && (<Grid item xs={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+
+                    {type !== "Open Source" && (
                         <Button
                             sx={{
-                                width: '34%',
-                                height: '70%',
-                                margin: 'auto 0',
-                                padding: '0',
+                                width: '20%',
+                                height: '56px',
+                                margin: '0 1%',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -183,26 +233,55 @@ const DatabaseList = ({ type, cardData }) => {
                                     }}
                                 />
                             }
+                            onClick={handleClick}
                         >
                             <Typography variant="body2">
                                 New
                             </Typography>
                         </Button>
-                    </Grid>)}
+                    )}
+                </Grid>
+
+                {/* Popover for New Button */}
+                <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                    sx={{
+                        mt: 1,
+                        color: '#ADADAD',
+                        '& .MuiPaper-root': { 
+                            border: '1px solid #ADADAD', 
+                            borderRadius: '10px',
+                            boxShadow: 'none', 
+                        },
+                    }}
+                >
+                    <List>
+                        <ListItem button onClick={() => { console.log('Database clicked'); }}>
+                            <ListItemIcon>
+                                <DatabaseIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Database" />
+                        </ListItem>
+                        <ListItem button onClick={() => { console.log('File clicked'); }}>
+                            <ListItemIcon>
+                                <FileIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="File" />
+                        </ListItem>
+                    </List>
+                </Popover>
             </Grid>
-
-
-            <Typography
-                variant="h6"
-                sx={{
-                    color: "grey",
-                    fontWeight: "550",
-                    fontFamily: "sans-serif",
-                    margin: "15px 2%",
-                }}
-            >
-                {type}
-            </Typography>
 
             {channel_types.map((channel) => (
                 <Box key={channel}>
