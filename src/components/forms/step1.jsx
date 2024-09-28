@@ -22,32 +22,44 @@ const StepOne = () => {
 
     return (
         <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Name
-            </Typography>
-            <Field
-                name="name"
-                as={TextField}
-                label="Enter report name"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                sx={{ marginBottom: '16px' }}
-            />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Description
-            </Typography>
-            <Field
-                name="description"
-                as={TextField}
-                label="Enter report description..."
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                multiline
-                rows={4}
-                sx={{ marginBottom: '16px' }}
-            />
+            <Grid container alignItems="center" spacing={2}>
+                <Grid item>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Name
+                    </Typography>
+                </Grid>
+                <Grid item xs>
+                    <Field
+                        name="name"
+                        as={TextField}
+                        label="Enter report name"
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        sx={{ marginBottom: '16px', ml: 7 }}
+                    />
+                </Grid>
+            </Grid>
+            <Grid container alignItems="center" spacing={2}>
+                <Grid item>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Description
+                    </Typography>
+                </Grid>
+                <Grid item xs>
+                    <Field
+                        name="description"
+                        as={TextField}
+                        label="Enter report description..."
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                        multiline
+                        rows={4}
+                        sx={{ marginBottom: '16px' }}
+                    />
+                    </Grid>
+            </Grid>
             <Grid container alignItems="center" sx={{ marginTop: '16px', marginBottom: '16px' }}>
                 <Grid item xs={8}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
