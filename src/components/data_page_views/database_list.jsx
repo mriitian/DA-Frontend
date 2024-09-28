@@ -151,7 +151,7 @@ const DatabaseList = ({type, cardData}) => {
                     </FormControl>
                 </Grid>
 
-                <Grid item xs={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                {/* <Grid item xs={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
 
                     <Button
                         sx={{
@@ -184,7 +184,7 @@ const DatabaseList = ({type, cardData}) => {
                             New
                         </Typography>
                     </Button>
-                </Grid>
+                </Grid> */}
             </Grid>
 
             <Typography 
