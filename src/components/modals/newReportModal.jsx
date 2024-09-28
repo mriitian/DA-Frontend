@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Box, Stepper, Step, StepLabel, Button } from '@mui/material';
+import { Modal, Box, Stepper, Step, StepLabel, Button, Typography } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik, FormikProvider } from 'formik';
 import * as Yup from 'yup';
@@ -11,7 +11,7 @@ import ReportDatasourceSlice from '../../store/slices/report_datasources';
 import ReportModal_API from '../../utilities/api/reportModalApis';
 
 const NewReportModal = () => {
-    const steps = ['Choose Data', 'Choose Template'];
+    const steps = ['Step 1: Choose Data', 'Step 2: Choose Template'];
     const [activeStep, setActiveStep] = useState(0);
     const open = useSelector(state => state.report_modal.open);
     const dispatch = useDispatch();
@@ -43,25 +43,30 @@ const NewReportModal = () => {
         const template = [values.templateId];
         const datasources = values.attachedData;
 
-        try{
-            const response = await ReportModal_API.createReport({accessToken:token,report_name:report_name,owner:user.username,nodes:[],users_access:[],template:template, datasources:datasources});
+        try {
+            const response = await ReportModal_API.createReport({
+                accessToken: token,
+                report_name: report_name,
+                owner: user.username,
+                nodes: [],
+                users_access: [],
+                template: template,
+                datasources: datasources
+            });
 
             console.log(response);
-            
+
             setActiveStep(0);
             handleClose();
             navigate(`/report/edit/${response.id}`);
 
-        }
-
-        catch(err){
+        } catch (err) {
             console.log(err);
         }
 
     };
 
     const handleBlankClick = async () => {
-
         const report_name = formik.values.name;
         const description = formik.values.description;
         const owner = user.username;
@@ -71,24 +76,14 @@ const NewReportModal = () => {
 
         console.log(report_name);
 
+        // Store the selected datasources in redux state before navigating
         dispatch(ReportDatasourceSlice.actions.setDatasources({
             datasources: formik.values.attachedData
         }));
 
-        try{
-            const response = await ReportModal_API.createReport({accessToken:token,report_name:report_name,owner:user.username,nodes:[],users_access:[],template:template, datasources:datasources});
-
-            console.log(response.data);
-            setActiveStep(0);
-            handleClose();
-            navigate(`/report/edit/${response.id}`);
-
-        }
-
-        catch(err){
-            console.log(err);
-        }
-
+        // Navigate to the new report creation page with a blank setup
+        navigate('/report/new');
+        handleClose(); // Close the modal
     };
 
     const validationSchema = [
@@ -136,6 +131,9 @@ const NewReportModal = () => {
                     scrollbarWidth: 'none',
                 }}
             >
+                <Typography variant="h4" sx={{ fontWeight: 500, fontSize: '24px', mb: 2.5 }}>
+                    Create Report
+                </Typography>
                 <Stepper activeStep={activeStep} alternativeLabel>
                     {steps.map((label) => (
                         <Step key={label}>
