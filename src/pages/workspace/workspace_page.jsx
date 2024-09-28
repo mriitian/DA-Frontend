@@ -1,54 +1,70 @@
-import TemplateCards from "../../components/cards/templateCards";
-import { Grid,Box,Button, Typography } from "@mui/material";
-import { TemplateData } from "../../assets/dataAsset/dataTemplateData";
-import { useParams, useSearchParams } from "react-router-dom";
-import DataList from "../../components/workspace/data_list";
-import { WorkspaceData } from "../../assets/dataAsset/dataWorkspace";
-import TemplateList from "../../components/workspace/template_list";
+import { useEffect, useState } from "react";
+import { Grid, Box, Button, Typography } from "@mui/material";
+import { useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import newReportModalSlice from "../../store/slices/newReportModalSlice";
-import NewReportModal from "../../components/modals/newReportModal";
+import AddIcon from "@mui/icons-material/Add";
 
-import AddIcon from '@mui/icons-material/Add';
+import DataList from "../../components/workspace/data_list";
+// import TemplateList from "../../components/workspace/template_list"; // Consider renaming this if needed
+import NewReportModal from "../../components/modals/newReportModal";
+import newReportModalSlice from "../../store/slices/newReportModalSlice";
+import { WorkspaceData } from "../../assets/dataAsset/dataWorkspace";
+import ReportAPIs from "../../utilities/api/reports/ReportAPIs";
+import ReportList from "../../components/workspace/report/ReportList";
 
 const WorkspacePage = () => {
     const [searchParams] = useSearchParams();
     const workspace_name = searchParams.get('name');
 
     const workspace = WorkspaceData.data;
-    const data = workspace.filter((arr)=>arr.name == workspace_name);
-    
-    const dispatch = useDispatch(); 
+    const data = workspace.filter((arr) => arr.name === workspace_name);
+    console.log("Workspace data:", data);
+
+    const [reports, setReports] = useState([]); // State for storing reports
+
+    const dispatch = useDispatch();
 
     const buttonStyles = {
-        // width: '34%',
         height: '60%',
         margin: 'auto 1%',
-        // padding: '0',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '6px',
         textTransform: 'none',
-    }
+    };
 
-    const handleReportClick = () =>{
-        console.log('asf');
+    const handleReportClick = () => {
         dispatch(newReportModalSlice.actions.setOpen({
-            open:true
+            open: true
         }));
-    }
+    };
 
-    return ( 
+    // Fetch reports when component mounts
+    useEffect(() => {
+        const fetchReports = async () => {
+            try {
+                const response = await ReportAPIs.getList(); // Fetching reports instead of templates
+                setReports(response); // Set the reports data from the API response
+            } catch (error) {
+                console.error('Failed to fetch reports:', error);
+            }
+        };
+
+        fetchReports();
+    }, []);
+
+    console.log("Reports:", reports);
+
+    return (
         <Box>
             <Grid container>
-                <Grid md="5" xs="7">
+                <Grid item md={5} xs={7}>
                     <Typography
-                        
                         sx={{
                             color: "grey",
-                            fontWeight: "550",
-                            fontFamily: "sans-serif",
+                            fontWeight: 550,
+                            // fontFamily: "sans-serif",
                             margin: "15px 2%",
                             fontSize: "20px"
                         }}
@@ -56,35 +72,28 @@ const WorkspacePage = () => {
                         {workspace_name}
                     </Typography>
                 </Grid>
-                <Grid 
-                    md="7"
-                    xs="3"
+                <Grid
+                    item
+                    md={7}
+                    xs={3}
                     sx={{
                         display: 'flex',
                         justifyContent: 'flex-end',
                         alignItems: 'center'
                     }}
                 >
-
-                    {/* <Button variant="contained" sx={{ marginRight: '10px' }} onClick={handleReportClick}>
-                        New Report
-                    </Button>
-                    <Button variant="contained">
-                        Import Data
-                    </Button> */}
-
                     <Button
                         sx={buttonStyles}
                         onClick={handleReportClick}
                         variant="contained"
                         color="primary"
                         startIcon={
-                            <AddIcon  
+                            <AddIcon
                                 sx={{
-                                    border:"1px solid white",
-                                    borderRadius:"5px",
-                                    height:"18px",
-                                    width:"90%"
+                                    border: "1px solid white",
+                                    borderRadius: "5px",
+                                    height: "18px",
+                                    width: "90%"
                                 }}
                             />
                         }
@@ -99,12 +108,12 @@ const WorkspacePage = () => {
                         variant="contained"
                         color="primary"
                         startIcon={
-                            <AddIcon  
+                            <AddIcon
                                 sx={{
-                                    border:"1px solid white",
-                                    borderRadius:"5px",
-                                    height:"18px",
-                                    width:"90%"
+                                    border: "1px solid white",
+                                    borderRadius: "5px",
+                                    height: "18px",
+                                    width: "90%"
                                 }}
                             />
                         }
@@ -113,14 +122,16 @@ const WorkspacePage = () => {
                             Import Data
                         </Typography>
                     </Button>
-                </Grid> 
+                </Grid>
             </Grid>
-            <DataList data={data[0]}/>
-            <TemplateList data={data[0]}/>
+            <DataList data={data[0]} />
+            {/* Pass fetched reports to the TemplateList component */}
+            {/* <TemplateList data={reports} />  */}
+            <ReportList data={reports} />
 
             <NewReportModal />
         </Box>
     );
-}
- 
+};
+
 export default WorkspacePage;
