@@ -1,12 +1,10 @@
-import DatabaseList from "../../components/data_page_views/database_list";
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
-import TableList from "../../components/data_page_views/table_list";
-import useFetch from "../../components/hooks/useFetch";
-import { useState, useEffect } from "react";
-import DatasourceList from "../../components/data_page_views/datasource_list";
-import OrganizationalData_API from "../../utilities/api/organizationalDataApis";
 import { useSelector } from "react-redux";
-
+import DatabaseList from "../../components/data_page_views/database_list";
+import DatasourceList from "../../components/data_page_views/datasource_list";
+import TableList from "../../components/data_page_views/table_list";
+import OrganizationalData_API from "../../utilities/api/organizationalDataApis";
 
 const OrgPage = () => {
     const [searchParams] = useSearchParams();
@@ -23,8 +21,7 @@ const OrgPage = () => {
     const [datafolderLoading, setDatafolderLoading] = useState(true);
     const [datafolderError, setDatafolderError] = useState(null);
 
-
-    useEffect(()=>{
+    useEffect(() => {
         const fetchDataSources = async () => {
             setDatasourceLoading(true);
             setDatasourceError(null);
@@ -40,14 +37,13 @@ const OrgPage = () => {
         };
 
         const fetchDataFolders = async () => {
-            setDatasourceLoading(true);
-            setDatasourceError(null);
+            setDatafolderLoading(true);
+            setDatafolderError(null);
 
             try {
                 const data = await OrganizationalData_API.getDataFolders(accessToken);
                 setDatafolderData(data);
             } catch (error) {
-                console.log(error);
                 setDatafolderError(error);
             } finally {
                 setDatafolderLoading(false);
@@ -56,37 +52,10 @@ const OrgPage = () => {
 
         fetchDataSources();
         fetchDataFolders();
-    },[accessToken])
+    }, [accessToken]);
 
     const [filteredDatasourceData, setFilteredDatasourceData] = useState([]);
     const [filteredDatafolderData, setFilteredDatafolderData] = useState([]);
-
-    const styles = {
-        spinner: {
-            border: '4px solid rgba(0, 0, 0, 0.1)',
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            borderLeftColor: '#09f',
-            animation: 'spin 1s ease infinite',
-            margin: '50px auto',
-        },
-        error: {
-            color: 'red',
-            textAlign: 'center',
-            marginTop: '20px',
-            fontSize: '18px',
-        },
-        '@keyframes spin': {
-            '0%': {
-                transform: 'rotate(0deg)',
-            },
-            '100%': {
-                transform: 'rotate(360deg)',
-            },
-        },
-    };
-    
 
     useEffect(() => {
         if (datasourceData) {
@@ -94,8 +63,8 @@ const OrgPage = () => {
             setFilteredDatasourceData(arr);
 
             if (datafolder_name) {
-                const datafolder_name1 = datafolderData.filter(temp => temp.name == datafolder_name);
-                const arr2 = datasourceData.filter(temp => temp.data_folder == datafolder_name1[0].id);
+                const datafolder_name1 = datafolderData.filter(temp => temp.name === datafolder_name);
+                const arr2 = datasourceData.filter(temp => temp.data_folder === datafolder_name1[0]?.id);
                 setFilteredDatafolderData(arr2);
             }
         }
@@ -105,21 +74,24 @@ const OrgPage = () => {
         return <div style={styles.spinner}></div>;
     }
 
-    if (datasourceError && datafolderError) {
-        console.log(datasourceError);
-        return <div  style={styles.error} >Error {datasourceError.message || datafolderError.message}</div>;
-    }
+    // if (datasourceError || datafolderError) {
+    //     return <div style={styles.error}>Error: {datasourceError?.message || datafolderError?.message}</div>;
+    // }
 
     return (
         <>
-            {!datasource_name && !datafolder_name && filteredDatasourceData.length && datafolderData && (
-                <DatabaseList type="Organizational" cardData={{ datasource_data: filteredDatasourceData, data2: datafolderData }} />
+            {!datasource_name && !datafolder_name && (
+                <DatabaseList
+                    type="Organizational"
+                    cardData={{
+                        datasource_data: filteredDatasourceData,
+                        data2: datafolderData
+                    }}
+                />
             )}
-
             {datafolder_name && (
                 <DatasourceList type="Organizational" datafolder_data={filteredDatafolderData} datafolder_name={datafolder_name} />
             )}
-
             {datasource_name && (
                 <TableList type="Organizational" datasource_name={datasource_name} />
             )}
@@ -127,6 +99,30 @@ const OrgPage = () => {
     );
 };
 
-
+const styles = {
+    spinner: {
+        border: '4px solid rgba(0, 0, 0, 0.1)',
+        width: '36px',
+        height: '36px',
+        borderRadius: '50%',
+        borderLeftColor: '#09f',
+        animation: 'spin 1s ease infinite',
+        margin: '50px auto',
+    },
+    error: {
+        color: 'red',
+        textAlign: 'center',
+        marginTop: '20px',
+        fontSize: '18px',
+    },
+    '@keyframes spin': {
+        '0%': {
+            transform: 'rotate(0deg)',
+        },
+        '100%': {
+            transform: 'rotate(360deg)',
+        },
+    },
+};
 
 export default OrgPage;
