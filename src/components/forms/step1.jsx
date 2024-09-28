@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Field, useFormikContext } from 'formik';
+import { Field, useFormikContext, ErrorMessage } from 'formik';
 import { TextField, Button, Box, Typography, Grid } from '@mui/material';
 import DataCards from '../cards/dataCards';
 import DataSelectModal from '../modals/dataSelectModal';
 
 const StepOne = () => {
-    const { values, setFieldValue } = useFormikContext();
+    const { values, setFieldValue, errors, touched } = useFormikContext(); // Added errors and touched for error handling
     const [dataOpen, setDataOpen] = useState(false);
     const [datasources, setDatasources] = useState([]);
 
@@ -22,6 +22,7 @@ const StepOne = () => {
 
     return (
         <Box>
+            {/* Report Name Field */}
             <Grid container alignItems="center" spacing={2}>
                 <Grid item>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -33,13 +34,17 @@ const StepOne = () => {
                         name="name"
                         as={TextField}
                         label="Enter report name"
-                        fullWidth
+                        // fullWidth
                         margin="normal"
                         variant="outlined"
-                        sx={{ marginBottom: '16px', ml: 7 }}
+                        sx={{ marginBottom: '8px', ml: 7, width:'95%' }}
+                        error={touched.name && Boolean(errors.name)} // Highlight field on error
+                        helperText={touched.name && errors.name ? errors.name : null} // Show error message
                     />
                 </Grid>
             </Grid>
+
+            {/* Report Description Field */}
             <Grid container alignItems="center" spacing={2}>
                 <Grid item>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -56,10 +61,14 @@ const StepOne = () => {
                         variant="outlined"
                         multiline
                         rows={4}
-                        sx={{ marginBottom: '16px' }}
+                        sx={{ marginBottom: '8px' }}
+                        error={touched.description && Boolean(errors.description)} // Highlight field on error
+                        helperText={touched.description && errors.description ? errors.description : null} // Show error message
                     />
-                    </Grid>
+                </Grid>
             </Grid>
+
+            {/* Attached Data Section */}
             <Grid container alignItems="center" sx={{ marginTop: '16px', marginBottom: '16px' }}>
                 <Grid item xs={8}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -83,16 +92,25 @@ const StepOne = () => {
                 </Grid>
             </Grid>
 
-            {datasources && (
+            {/* Show Attached Data Cards */}
+            {datasources.length > 0 && (
                 <Grid container spacing={2}>
                     {datasources.map((data) => (
-                        <Grid item md={3} xs={3} key={data.id}>
+                        <Grid item md={3} xs={6} key={data.id}>
                             <DataCards data={data} />
                         </Grid>
                     ))}
                 </Grid>
             )}
 
+            {/* Display Error for Attached Data */}
+            {touched.attachedData && errors.attachedData && (
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                    {errors.attachedData}
+                </Typography>
+            )}
+
+            {/* Data Selection Modal */}
             <DataSelectModal open={dataOpen} setOpen={setDataOpen} data={datasources} setData={setDatasources} />
         </Box>
     );
