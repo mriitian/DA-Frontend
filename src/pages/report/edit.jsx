@@ -40,6 +40,39 @@ const EditPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Function to parse node position safely
+    const parsePosition = (position) => {
+        if (typeof position === 'string') {
+            try {
+                // Use regex to transform the position string into a valid JSON format
+                let formattedPosition = position.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":');
+                return JSON.parse(formattedPosition);
+            } catch (e) {
+                console.error('Error parsing position:', position);
+                return { x: 0, y: 0 }; // Default fallback position
+            }
+        }
+        return position;
+    };
+
+    // Function to parse node data safely
+    const parseData = (data) => {
+        if (typeof data === 'string') {
+            try {
+                // Similar transformation for data string
+                let formattedData = data
+                    .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
+                    .replace(/'([^']+)'/g, '"$1"') // Convert single quotes to double quotes
+                    .replace(/ƒ/g, 'null'); // Replace function references with null
+                return JSON.parse(formattedData);
+            } catch (e) {
+                console.error('Error parsing data:', data);
+                return { label: '' }; // Default fallback data
+            }
+        }
+        return data;
+    };
+
     useEffect(() => {
         const fetchChartData = async () => {
             setLoading(true);
@@ -49,7 +82,15 @@ const EditPage = () => {
                 const data1 = await ReportAPIs.getDetail(report_name); // Fetch report details using report_name
                 setData(data1);
                 setReportName(data1.report_name); // Update report name from fetched data
-                setNodes(data1.nodes);
+
+                // Parse nodes before setting them
+                const parsedNodes = data1.nodes.map((node) => ({
+                    ...node,
+                    position: parsePosition(node.position),
+                    data: parseData(node.data)
+                }));
+
+                setNodes(parsedNodes);
                 console.log(data1);
             } catch (error) {
                 setError(error);
@@ -216,7 +257,6 @@ const EditPage = () => {
                                     <TextField
                                         id="standard-basic"
                                         variant="standard"
-                                        defaultValue="Untitled Report"
                                         sx={{
                                             fontSize: '1.3rem',
                                             fontWeight: 'bolder',
