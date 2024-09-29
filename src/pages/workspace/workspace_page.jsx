@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { Grid, Box, Button, Typography } from "@mui/material";
+import { Grid, Box, Button, Typography, CircularProgress } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import AddIcon from "@mui/icons-material/Add";
 
 import DataList from "../../components/workspace/data_list";
-// import TemplateList from "../../components/workspace/template_list"; // Consider renaming this if needed
 import NewReportModal from "../../components/modals/newReportModal";
 import newReportModalSlice from "../../store/slices/newReportModalSlice";
 import { WorkspaceData } from "../../assets/dataAsset/dataWorkspace";
@@ -18,9 +17,9 @@ const WorkspacePage = () => {
 
     const workspace = WorkspaceData.data;
     const data = workspace.filter((arr) => arr.name === workspace_name);
-    console.log("Workspace data:", data);
 
     const [reports, setReports] = useState([]); // State for storing reports
+    const [loading, setLoading] = useState(true); // State for handling loading
 
     const dispatch = useDispatch();
 
@@ -44,15 +43,19 @@ const WorkspacePage = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await ReportAPIs.getList(); // Fetching reports instead of templates
+                setLoading(true); // Start loading
+                const response = await ReportAPIs.getList(); // Fetching reports
+                console.log("Fetched reports API Response:", response);
                 setReports(response); // Set the reports data from the API response
             } catch (error) {
                 console.error('Failed to fetch reports:', error);
+            } finally {
+                setLoading(false); // Stop loading once done
             }
         };
 
         fetchReports();
-    }, []);
+    }, [workspace_name]);
 
     console.log("Reports:", reports);
 
@@ -64,7 +67,6 @@ const WorkspacePage = () => {
                         sx={{
                             color: "grey",
                             fontWeight: 550,
-                            // fontFamily: "sans-serif",
                             margin: "15px 2%",
                             fontSize: "20px"
                         }}
@@ -124,10 +126,17 @@ const WorkspacePage = () => {
                     </Button>
                 </Grid>
             </Grid>
+
             <DataList data={data[0]} />
-            {/* Pass fetched reports to the TemplateList component */}
-            {/* <TemplateList data={reports} />  */}
-            <ReportList data={reports} />
+
+            {/* Show loading indicator or reports */}
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                    <CircularProgress />
+                </Box>
+            ) : (
+                <ReportList data={reports} />
+            )}
 
             <NewReportModal />
         </Box>
