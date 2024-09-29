@@ -113,23 +113,23 @@ const DataSelectModal = ({ open, setOpen, data, setData }) => {
                 aria-describedby="modal-modal-description"
                 sx={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    alignItems: 'center', // Center align vertically
+                    justifyContent: 'center', // Center align horizontally
                 }}
             >
                 <Box
                     sx={{
-                        width: '80%',
-                        maxHeight: '80%',
-                        overflowY: 'auto',
+                        width: '70%', // Set the width to 70%
+                        maxHeight: '80%', // Ensure modal doesn't overflow vertically
+                        overflowY: 'auto', // Scroll if content exceeds height
                         backgroundColor: 'white',
                         border: '2px solid #000',
                         p: 4,
                         boxShadow: 24,
                         '&::-webkit-scrollbar': {
-                            display: 'none',
+                            display: 'none', // Hide scrollbar in WebKit browsers
                         },
-                        scrollbarWidth: 'none',
+                        scrollbarWidth: 'none', // Hide scrollbar for Firefox
                     }}
                 >
                     <Typography variant="h6" sx={{ mb: 2 }}>
@@ -148,9 +148,21 @@ const DataSelectModal = ({ open, setOpen, data, setData }) => {
                     </Box>
 
                     <Box>
-                        {dataType === 'open' && open_error && <Typography color="error">Failed to fetch open data</Typography>}
-                        {dataType === 'org' && org_error && <Typography color="error">Failed to fetch organizational data</Typography>}
-                        {dataType === 'pri' && pri_error && <Typography color="error">Failed to fetch private data</Typography>}
+                        {dataType === 'open' && open_error && (
+                            <Typography color="error">
+                                {open_error?.response?.data?.error || 'Failed to fetch open data'}
+                            </Typography>
+                        )}
+                        {dataType === 'org' && org_error && (
+                            <Typography color="error">
+                                {org_error?.response?.data?.error || 'Failed to fetch organizational data'}
+                            </Typography>
+                        )}
+                        {dataType === 'pri' && pri_error && (
+                            <Typography color="error">
+                                {pri_error?.response?.data?.error || 'Failed to fetch private data'}
+                            </Typography>
+                        )}
 
                         {dataType === 'open' && !open_loading && open_data && (
                             <Grid container columnGap={2}>
