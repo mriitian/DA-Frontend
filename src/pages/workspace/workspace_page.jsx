@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Box, Button, Typography, CircularProgress } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -10,6 +10,7 @@ import newReportModalSlice from "../../store/slices/newReportModalSlice";
 import { WorkspaceData } from "../../assets/dataAsset/dataWorkspace";
 import ReportAPIs from "../../utilities/api/reports/ReportAPIs";
 import ReportList from "../../components/workspace/report/ReportList";
+import ImportDataModal from "./ImportDataModal";
 
 const WorkspacePage = () => {
     const [searchParams] = useSearchParams();
@@ -20,6 +21,7 @@ const WorkspacePage = () => {
 
     const [reports, setReports] = useState([]); // State for storing reports
     const [loading, setLoading] = useState(true); // State for handling loading
+    const [importModalOpen, setImportModalOpen] = useState(false); // State for Import Modal
 
     const dispatch = useDispatch();
 
@@ -37,6 +39,14 @@ const WorkspacePage = () => {
         dispatch(newReportModalSlice.actions.setOpen({
             open: true
         }));
+    };
+
+    const handleImportClick = () => {
+        setImportModalOpen(true); // Open the import modal
+    };
+
+    const closeImportModal = () => {
+        setImportModalOpen(false); // Close the import modal
     };
 
     // Fetch reports when component mounts
@@ -107,6 +117,7 @@ const WorkspacePage = () => {
 
                     <Button
                         sx={buttonStyles}
+                        onClick={handleImportClick} // Open import modal on click
                         variant="contained"
                         color="primary"
                         startIcon={
@@ -139,6 +150,7 @@ const WorkspacePage = () => {
             )}
 
             <NewReportModal />
+            <ImportDataModal open={importModalOpen} onClose={closeImportModal} /> {/* Include Import Modal */}
         </Box>
     );
 };
