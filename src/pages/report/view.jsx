@@ -1,12 +1,12 @@
 import { Button, Grid, Typography, Box } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import ReactFlow, { ReactFlowProvider, useNodesState, useEdgesState, MiniMap } from 'reactflow';
 import RectangleNode from "../../components/nodes/rect_node";
 import TextNode from "../../components/nodes/text_node";
 import ChartNode from "../../components/nodes/chartNode";
 import 'reactflow/dist/style.css';
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";  // Use `useNavigate` instead of `useHistory`
 import { useEffect, useRef, useState } from "react";
 import ReportAPIs from "../../utilities/api/reports/ReportAPIs";
 
@@ -36,7 +36,7 @@ const ViewPage = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
     const flowWrapper = useRef(null);
-
+    const navigate = useNavigate();  // Use `useNavigate` instead of `useHistory`
     const { report_name } = useParams();
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const ViewPage = () => {
             setNodes(data.nodes.map((node) => {
                 let parsedPosition = { x: 0, y: 0 };
                 let parsedData = {};
-    
+
                 // Check if position is a string and then parse it, otherwise use it directly
                 if (typeof node.position === 'string') {
                     try {
@@ -88,7 +88,7 @@ const ViewPage = () => {
                 } else if (typeof node.position === 'object' && node.position !== null) {
                     parsedPosition = node.position;
                 }
-    
+
                 // Check if data is a string and then parse it, otherwise use it directly
                 if (typeof node.data === 'string') {
                     try {
@@ -97,7 +97,7 @@ const ViewPage = () => {
                             .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":') // Add double quotes around property names
                             .replace(/'([^']+)'/g, '"$1"') // Convert single quotes to double quotes for string values
                             .replace(/ƒ/g, 'null'); // Replace function placeholders with null or appropriate value
-    
+
                         parsedData = JSON.parse(formattedData);
                     } catch (e) {
                         console.error('Error parsing node data:', node.data);
@@ -106,14 +106,14 @@ const ViewPage = () => {
                 } else if (typeof node.data === 'object' && node.data !== null) {
                     parsedData = node.data;
                 }
-    
+
                 return {
                     ...node,
                     id: node.id || node.node_name,
                     position: parsedPosition,
                     height: node.height,
                     width: node.width,
-                    draggable: false,
+                    draggable: false, // Disable dragging in view mode
                     selectable: false,
                     data: {
                         ...parsedData,
@@ -123,7 +123,7 @@ const ViewPage = () => {
                 };
             }).filter(node => node !== null)); // Filter out any null nodes
         }
-    }, [data]);    
+    }, [data]);
 
     useEffect(() => {
         console.log("Nodes State:", nodes);
@@ -139,6 +139,12 @@ const ViewPage = () => {
         overflow: "auto",
         borderRadius: "15px",
         marginTop: "2%"
+    };
+
+    // Function to handle edit button click
+    const handleEdit = () => {
+        const reportId = data.id; // Assuming 'data' contains 'report_id'
+        navigate(`/report/${reportId}/edit`); // Navigate to the edit page using `navigate`
     };
 
     return (
@@ -165,13 +171,13 @@ const ViewPage = () => {
                                 alignItems: 'center'
                             }}
                         >
-
+                            {/* Edit Button */}
                             <Button
                                 sx={buttonStyles}
                                 variant="contained"
                                 color="primary"
                                 startIcon={
-                                    <AddIcon
+                                    <EditIcon
                                         sx={{
                                             border: "1px solid white",
                                             borderRadius: "5px",
@@ -180,9 +186,10 @@ const ViewPage = () => {
                                         }}
                                     />
                                 }
+                                onClick={handleEdit} // Navigate to edit page on click
                             >
                                 <Typography variant="body2">
-                                    Save
+                                    Edit
                                 </Typography>
                             </Button>
                             <Button
@@ -190,7 +197,7 @@ const ViewPage = () => {
                                 variant="contained"
                                 color="primary"
                                 startIcon={
-                                    <AddIcon
+                                    <EditIcon
                                         sx={{
                                             border: "1px solid white",
                                             borderRadius: "5px",
@@ -241,6 +248,8 @@ const ViewPage = () => {
                                 zoomOnDoubleClick={false}
                                 panOnScroll={false}
                                 panOnDrag={true}
+                                nodesDraggable={false} // Disable node dragging
+                                nodesConnectable={false} // Disable edge connections in view mode
                             >
                                 <MiniMap nodeStrokeWidth={6} zoomable pannable />
                             </ReactFlow>
