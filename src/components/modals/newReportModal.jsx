@@ -13,6 +13,7 @@ import ReportModal_API from '../../utilities/api/reportModalApis';
 const NewReportModal = () => {
     const steps = ['Step 1: Choose Data', 'Step 2: Choose Template'];
     const [activeStep, setActiveStep] = useState(0);
+    const [submitError, setSubmitError] = useState(''); // State for submission errors
     const open = useSelector(state => state.report_modal.open);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -26,7 +27,12 @@ const NewReportModal = () => {
     };
 
     const handleNext = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        if (!formik.isValid) {
+            formik.validateForm();
+        } else {
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setSubmitError(''); // Clear submission error when moving to next step
+        }
     };
 
     const handleBack = () => {
@@ -58,45 +64,71 @@ const NewReportModal = () => {
 
             setActiveStep(0);
             handleClose();
-            navigate(`/report/edit/${response.id}`);
+            navigate(`/report/${response.id}/edit/`);
 
         } catch (err) {
-            console.log(err);
+            console.error('Submission Error:', err);
+            setSubmitError('Failed to create the report. Please try again.'); // Set submission error
         }
 
     };
 
     const handleBlankClick = async () => {
-        const report_name = formik.values.name;
-        const description = formik.values.description;
+        const report_name = formik.values.name || 'Untitled Report';  // Default to 'Untitled Report' if name is not provided
+        const description = formik.values.description || '';
         const owner = user.username;
         const nodes = [];
         const template = [];
         const datasources = formik.values.attachedData;
+    
+        try {
+            // Make a post request to create a new report with a blank setup
+            const response = await ReportModal_API.createReport({
+                accessToken: token,
+                report_name: report_name,
+                owner: owner,
+                nodes: [],
+                users_access: [],
+                template: template,
+                datasources: datasources
+            });
+    
+            console.log(response); // Log the response for debugging purposes
+    
+            // Store the selected datasources in redux state before navigating
+            dispatch(ReportDatasourceSlice.actions.setDatasources({
+                datasources: formik.values.attachedData
+            }));
+    
+            // Navigate to the new report edit page using the report ID from the response
+            navigate(`/report/${response.id}/edit/`);
+            handleClose(); // Close the modal after navigation
+    
+        } catch (err) {
+            console.error('Error creating a blank report:', err);
+            setSubmitError('Failed to create a blank report. Please try again.');
+        }
+    };    
 
-        console.log(report_name);
-
-        // Store the selected datasources in redux state before navigating
-        dispatch(ReportDatasourceSlice.actions.setDatasources({
-            datasources: formik.values.attachedData
-        }));
-
-        // Navigate to the new report creation page with a blank setup
-        navigate('/report/new');
-        handleClose(); // Close the modal
-    };
-
+    // Validation schema for each step
     const validationSchema = [
         Yup.object({
-            name: Yup.string().required('Required'),
-            description: Yup.string().required('Required'),
-            attachedData: Yup.array().min(1, 'At least one data source is required')
+            name: Yup.string()
+                .required('Please enter a report name. This field cannot be left blank.')
+                .min(3, 'Report name must be at least 3 characters long.'),
+            description: Yup.string()
+                .required('Please provide a description for your report. This field is mandatory.')
+                .min(10, 'Description must be at least 10 characters long.'),
+            // attachedData: Yup.array()
+            //     .min(1, 'You must select at least one data source to proceed.'),
         }),
-        Yup.object({
-            templateId: Yup.string().required('Required')
-        })
+        // Yup.object({
+        //     templateId: Yup.string()
+        //         .required('Please choose a template to create your report.'),
+        // }),
     ];
 
+    // Initial form values
     const initialValues = {
         name: '',
         description: '',
@@ -104,10 +136,13 @@ const NewReportModal = () => {
         templateId: ''
     };
 
+    // Formik setup
     const formik = useFormik({
         initialValues,
-        validationSchema: validationSchema[activeStep],
-        onSubmit: handleSubmit
+        validationSchema: validationSchema[activeStep], // Dynamic validation schema based on active step
+        onSubmit: handleSubmit,
+        validateOnMount: true, // Validate form on mount to disable Next button if invalid
+        enableReinitialize: true
     });
 
     return (
@@ -143,8 +178,16 @@ const NewReportModal = () => {
                 </Stepper>
                 <FormikProvider value={formik}>
                     <form onSubmit={formik.handleSubmit}>
+                        {/* Step One */}
                         {activeStep === 0 && <StepOne />}
+                        {/* Step Two */}
                         {activeStep === 1 && <StepTwo />}
+                        {/* Submission Error */}
+                        {submitError && (
+                            <Typography color="error" sx={{ mt: 2 }}>
+                                {submitError}
+                            </Typography>
+                        )}
                         <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
                             <Button
                                 color="inherit"
@@ -156,15 +199,19 @@ const NewReportModal = () => {
                             </Button>
                             <Box sx={{ flex: '1 1 auto' }} />
                             {activeStep === steps.length - 1 ? (
-                                <Button type="submit" disabled={formik.isSubmitting}>
+                                <Button type="submit" disabled={formik.isSubmitting || !formik.isValid}>
                                     Submit
                                 </Button>
                             ) : (
-                                <Button sx={{ border: "1px solid green" }} onClick={handleNext}>
+                                <Button
+                                    sx={{ border: '1px solid green' }}
+                                    onClick={handleNext}
+                                    disabled={!formik.isValid || formik.isSubmitting}
+                                >
                                     Choose Template
                                 </Button>
                             )}
-                            <Button onClick={handleBlankClick} sx={{ border: "1px solid black", color: "black", marginLeft: "1%" }}>
+                            <Button onClick={handleBlankClick} sx={{ border: '1px solid black', color: 'black', marginLeft: '1%' }}>
                                 Start from Blank
                             </Button>
                         </Box>
