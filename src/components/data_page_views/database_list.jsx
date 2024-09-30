@@ -14,37 +14,33 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Modal,
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import DatabaseIcon from '@mui/icons-material/Storage'; // Icon for Database
-import FileIcon from '@mui/icons-material/InsertDriveFile'; // Icon for File
+import DatabaseIcon from '@mui/icons-material/Storage';
+import FileIcon from '@mui/icons-material/InsertDriveFile';
 import DataCards from "../cards/dataCards";
 import DataFolderCards from "../cards/datafolderCards";
 import AccessControlModal from "../modals/accessControlModal";
-import DataPage_API from "../../utilities/api/dataPageApis"; // Ensure this API utility is available
+import DataPage_API from "../../utilities/api/dataPageApis";
+import AddDatabase from "../modals/AddDatabase";
 
 const DatabaseList = ({ type, cardData }) => {
-    // Debugging log to verify the component is receiving props correctly
-    console.log('DatabaseList Opened', cardData);
-
-    // State for brand data fetched from API
+    // State for brand data and modal visibility
     const [brandData, setBrandData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isAddDatabaseOpen, setIsAddDatabaseOpen] = useState(false); // State for AddDatabase modal
 
-    // Fetch the access token from Redux store
     const accessToken = useSelector(state => state.login.token);
 
-    // Fetch brand data using the API and store in state
     useEffect(() => {
         const fetchBrands = async () => {
             setLoading(true);
             setError(null);
-
             try {
-                const data = await DataPage_API.getBrands(accessToken); // API call to fetch brands
-                console.log(data);
+                const data = await DataPage_API.getBrands(accessToken);
                 setBrandData(data);
             } catch (error) {
                 setError(error);
@@ -52,19 +48,15 @@ const DatabaseList = ({ type, cardData }) => {
                 setLoading(false);
             }
         };
-
         fetchBrands();
     }, [accessToken]);
 
-    // Extract data sources and data folders from props
     const datasources = cardData.datasource_data;
     const datafolders = cardData.data2;
 
-    // State for selected brand and data channel filters
     const [brand, setBrand] = useState('');
     const [dataChannel, setDataChannel] = useState('');
 
-    // Event handlers for the brand and data channel dropdowns
     const handleBrandChange = (event) => {
         setBrand(event.target.value);
     };
@@ -73,31 +65,23 @@ const DatabaseList = ({ type, cardData }) => {
         setDataChannel(event.target.value);
     };
 
-    // Extract unique channel types from data sources
     const channel_types = [...new Set(datasources.map(item => item.channel_type))];
-
-    // State for filtered data sources and data folders based on selected filters
     const [filt_datasources, setFilt_datasources] = useState(datasources);
     const [filt_datafolders, setFilt_datafolders] = useState(datafolders);
 
-    // Popover state for 'New' button
     const [anchorEl, setAnchorEl] = useState(null);
 
-    // Function to handle opening of the popover
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
-    // Function to handle closing of the popover
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    // Boolean to check if popover is open
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
-    // Effect to update filtered data based on selected brand and data channel
     useEffect(() => {
         if (dataChannel.length === 0 && brand.length === 0) {
             setFilt_datafolders(datafolders);
@@ -127,7 +111,15 @@ const DatabaseList = ({ type, cardData }) => {
         }
     }, [brand, dataChannel]);
 
-    // Show a loading spinner while the brand data is being fetched
+    const handleDatabaseClick = () => {
+        setIsAddDatabaseOpen(true); // Open the AddDatabase modal
+        handleClose(); // Close the popover after clicking
+    };
+
+    const handleAddDatabaseClose = () => {
+        setIsAddDatabaseOpen(false); // Close the AddDatabase modal
+    };
+
     if (loading) {
         return <div style={{ textAlign: 'center', margin: '20px' }}>Loading...</div>;
     }
@@ -167,7 +159,7 @@ const DatabaseList = ({ type, cardData }) => {
                             IconComponent={KeyboardArrowDownIcon}
                             sx={{
                                 '& fieldset': {
-                                    border: 'none', // Remove the default border of the Select component
+                                    border: 'none',
                                 },
                             }}
                         >
@@ -196,7 +188,7 @@ const DatabaseList = ({ type, cardData }) => {
                             IconComponent={KeyboardArrowDownIcon}
                             sx={{
                                 '& fieldset': {
-                                    border: 'none', // Remove the default border of the Select component
+                                    border: 'none',
                                 },
                             }}
                         >
@@ -267,7 +259,7 @@ const DatabaseList = ({ type, cardData }) => {
                     }}
                 >
                     <List>
-                        <ListItem button onClick={() => { console.log('Database clicked'); }}>
+                        <ListItem button onClick={handleDatabaseClick}>
                             <ListItemIcon>
                                 <DatabaseIcon />
                             </ListItemIcon>
@@ -282,6 +274,33 @@ const DatabaseList = ({ type, cardData }) => {
                     </List>
                 </Popover>
             </Grid>
+
+            {/* Modal to display AddDatabase component */}
+            <Modal
+                open={isAddDatabaseOpen}
+                onClose={handleAddDatabaseClose}
+                aria-labelledby="modal-add-database-title"
+                aria-describedby="modal-add-database-description"
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        // width: '52.5%',              // Adjust to make the modal responsive
+                        // maxWidth: 500,             // Set a max width for the modal
+                        bgcolor: 'background.paper',
+                        borderRadius: '12px',      // Add some border radius for aesthetics
+                        boxShadow: 24,
+                        // p: 4,                      // Ensure padding is applied to the content
+                        // overflow: 'auto',          // Add overflow auto to handle content that might overflow
+                        // maxHeight: '90vh',         // Ensure the modal doesn't exceed the viewport height
+                    }}
+                >
+                    <AddDatabase handleClose={handleAddDatabaseClose} /> {/* Render the AddDatabase component here */}
+                </Box>
+            </Modal>
 
             {channel_types.map((channel) => (
                 <Box key={channel}>
@@ -315,6 +334,6 @@ const DatabaseList = ({ type, cardData }) => {
             <AccessControlModal />
         </>
     );
-}
+};
 
 export default DatabaseList;
