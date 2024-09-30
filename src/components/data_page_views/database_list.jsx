@@ -25,6 +25,7 @@ import DataFolderCards from "../cards/datafolderCards";
 import AccessControlModal from "../modals/accessControlModal";
 import DataPage_API from "../../utilities/api/dataPageApis";
 import AddDatabase from "../modals/AddDatabase";
+import AddCsvExcelModal from "../modals/AddCsvExcelModal"; // Import your new AddCsvExcelModal component
 
 const DatabaseList = ({ type, cardData }) => {
     // State for brand data and modal visibility
@@ -32,6 +33,7 @@ const DatabaseList = ({ type, cardData }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAddDatabaseOpen, setIsAddDatabaseOpen] = useState(false); // State for AddDatabase modal
+    const [isAddCsvExcelOpen, setIsAddCsvExcelOpen] = useState(false); // State for AddCsvExcel modal
 
     const accessToken = useSelector(state => state.login.token);
 
@@ -116,8 +118,17 @@ const DatabaseList = ({ type, cardData }) => {
         handleClose(); // Close the popover after clicking
     };
 
+    const handleFileClick = () => {
+        setIsAddCsvExcelOpen(true); // Open the AddCsvExcel modal
+        handleClose(); // Close the popover after clicking
+    };
+
     const handleAddDatabaseClose = () => {
         setIsAddDatabaseOpen(false); // Close the AddDatabase modal
+    };
+
+    const handleAddCsvExcelClose = () => {
+        setIsAddCsvExcelOpen(false); // Close the AddCsvExcel modal
     };
 
     if (loading) {
@@ -265,7 +276,7 @@ const DatabaseList = ({ type, cardData }) => {
                             </ListItemIcon>
                             <ListItemText primary="Database" />
                         </ListItem>
-                        <ListItem button onClick={() => { console.log('File clicked'); }}>
+                        <ListItem button onClick={handleFileClick}>
                             <ListItemIcon>
                                 <FileIcon />
                             </ListItemIcon>
@@ -288,17 +299,34 @@ const DatabaseList = ({ type, cardData }) => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        // width: '52.5%',              // Adjust to make the modal responsive
-                        // maxWidth: 500,             // Set a max width for the modal
                         bgcolor: 'background.paper',
-                        borderRadius: '12px',      // Add some border radius for aesthetics
+                        borderRadius: '12px',
                         boxShadow: 24,
-                        // p: 4,                      // Ensure padding is applied to the content
-                        // overflow: 'auto',          // Add overflow auto to handle content that might overflow
-                        // maxHeight: '90vh',         // Ensure the modal doesn't exceed the viewport height
                     }}
                 >
                     <AddDatabase handleClose={handleAddDatabaseClose} /> {/* Render the AddDatabase component here */}
+                </Box>
+            </Modal>
+
+            {/* Modal to display AddCsvExcelModal component */}
+            <Modal
+                open={isAddCsvExcelOpen}
+                onClose={handleAddCsvExcelClose}
+                aria-labelledby="modal-add-csv-excel-title"
+                aria-describedby="modal-add-csv-excel-description"
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        borderRadius: '12px',
+                        boxShadow: 24,
+                    }}
+                >
+                    <AddCsvExcelModal open={isAddCsvExcelOpen} handleClose={handleAddCsvExcelClose} /> {/* Render the AddCsvExcelModal component here */}
                 </Box>
             </Modal>
 
