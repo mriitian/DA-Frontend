@@ -10,7 +10,7 @@ import newReportModalSlice from "../../store/slices/newReportModalSlice";
 import { WorkspaceData } from "../../assets/dataAsset/dataWorkspace";
 import ReportAPIs from "../../utilities/api/reports/ReportAPIs";
 import ReportList from "../../components/workspace/report/ReportList";
-import ImportDataModal from "./ImportDataModal";
+import ImportDataModal from "./ImportDataModal"; // Updated ImportDataModal to use DataSelectModal
 
 const WorkspacePage = () => {
     const [searchParams] = useSearchParams();
@@ -22,6 +22,7 @@ const WorkspacePage = () => {
     const [reports, setReports] = useState([]); // State for storing reports
     const [loading, setLoading] = useState(true); // State for handling loading
     const [importModalOpen, setImportModalOpen] = useState(false); // State for Import Modal
+    const [selectedDataSources, setSelectedDataSources] = useState(data[0]?.datasources || []); // Store selected data sources
 
     const dispatch = useDispatch();
 
@@ -49,6 +50,15 @@ const WorkspacePage = () => {
         setImportModalOpen(false); // Close the import modal
     };
 
+    const handleDataSelect = (selectedData) => {
+        // Append the newly selected data to the existing selected data sources
+        setSelectedDataSources((prevDataSources) => [
+            ...prevDataSources,
+            ...selectedData
+        ]);
+        closeImportModal(); // Close the import modal
+    };
+
     // Fetch reports when component mounts
     useEffect(() => {
         const fetchReports = async () => {
@@ -66,8 +76,6 @@ const WorkspacePage = () => {
 
         fetchReports();
     }, [workspace_name]);
-
-    console.log("Reports:", reports);
 
     return (
         <Box>
@@ -138,7 +146,8 @@ const WorkspacePage = () => {
                 </Grid>
             </Grid>
 
-            <DataList data={data[0]} />
+            {/* Pass selectedDataSources to DataList */}
+            <DataList data={{ ...data[0], datasources: selectedDataSources }} />
 
             {/* Show loading indicator or reports */}
             {loading ? (
@@ -150,7 +159,7 @@ const WorkspacePage = () => {
             )}
 
             <NewReportModal />
-            <ImportDataModal open={importModalOpen} onClose={closeImportModal} /> {/* Include Import Modal */}
+            <ImportDataModal open={importModalOpen} onClose={closeImportModal} /> {/* Use updated ImportDataModal */}
         </Box>
     );
 };
