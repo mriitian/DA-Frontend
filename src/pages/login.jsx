@@ -6,11 +6,11 @@ import {
   Button,
   Paper,
   Typography,
-  Link,
   styled,
   IconButton,
   InputAdornment,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import loginSlice from "../store/slices/loginSlice";
@@ -187,7 +187,7 @@ const Login = () => {
           <StyledLink href="#">Forgot password?</StyledLink>
         </form>
         <SignupLink>
-          Don't have an account yet? <Link href="/signup">Get started now</Link>
+          Don't have an account yet? <Link to="/signup">Get started now</Link>
         </SignupLink>
 
         {error && (
