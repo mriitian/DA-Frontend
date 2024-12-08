@@ -187,7 +187,8 @@ const Login = () => {
           <StyledLink href="#">Forgot password?</StyledLink>
         </form>
         <SignupLink>
-          Don't have an account yet? <Link to="/signup">Get started now</Link>
+          Don't have an account yet?{" "}
+          <StyledLink to="/signup">Get started now</StyledLink>
         </SignupLink>
 
         {error && (
