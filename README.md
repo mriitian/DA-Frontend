@@ -10,4 +10,4 @@ Currently, two official plugins are available:
 # Additions
 
 1. Fixed the getting started link - In login.jsx the Link was imported from mui not react-router-dom
-2.
+2. Added vercel.json to handle the routes refresh
